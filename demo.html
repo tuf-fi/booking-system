@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lantaw booking system demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F6F4; --card:#FFFFFF; --ink:#14231C; --muted:#56675E;
+  --leaf:#2F6B4F; --leaf-2:#E1ECE6; --sky:#D3E5EE;
+  --sun:#F2B33D; --sun-2:#FCECC6; --line:#D3DED8; --danger:#A8402E; --danger-2:#F6E0DB;
+  --display:"Bricolage Grotesque", system-ui, sans-serif;
+  --body:"Figtree", system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--leaf);outline-offset:2px;border-radius:6px}
+[hidden]{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:rgba(243,246,244,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
+.switch{display:flex;background:var(--leaf-2);border-radius:999px;padding:4px}
+.switch a{padding:7px 16px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px;white-space:nowrap}
+.switch a[aria-current="page"]{background:var(--ink);color:#fff}
+.demo-note{font-size:13px;color:var(--muted)}
+
+/* guest intro */
+.intro{padding:44px 0 28px;display:grid;grid-template-columns:1.3fr 1fr;gap:32px;align-items:end}
+.intro h1{font-size:clamp(38px,6vw,68px);font-weight:800;letter-spacing:-.03em;max-width:12ch}
+.intro p{margin:0;color:var(--muted);max-width:46ch}
+.intro .facts{margin-top:10px;font-size:15px}
+.intro .facts strong{color:var(--ink);font-weight:600}
+
+.book-grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px;align-items:start;padding-bottom:64px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px}
+.panel h2{font-size:22px;font-weight:700;letter-spacing:-.01em}
+
+/* rooms */
+.rooms{border:0;margin:0 0 22px;padding:0}
+.rooms legend{font-family:var(--display);font-weight:700;font-size:22px;margin-bottom:12px;padding:0}
+.room{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+.room:first-of-type{border-radius:14px 14px 0 0}
+.room:last-of-type{border-radius:0 0 14px 14px}
+.room + .room{border-top:0}
+.room input{accent-color:var(--leaf);width:18px;height:18px;margin:0}
+.room:has(input:checked){background:var(--leaf-2);box-shadow:inset 4px 0 0 var(--leaf)}
+.room .name{font-weight:700}
+.room .desc{font-size:14px;color:var(--muted)}
+.room .from{text-align:right;font-size:14px;color:var(--muted);white-space:nowrap}
+.room .from b{display:block;font-family:var(--display);font-size:20px;color:var(--ink)}
+
+/* calendar: the memorable thing */
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+.cal-month{font-family:var(--display);font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-.02em}
+.cal-nav{display:flex;gap:6px}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);cursor:pointer;display:grid;place-items:center}
+.icon-btn:hover:not(:disabled){background:var(--leaf-2)}
+.icon-btn:disabled{opacity:.35;cursor:default}
+.cal-hint{color:var(--muted);font-size:14px;margin:0 0 14px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.dow{font-size:13px;font-weight:600;color:var(--muted);text-align:center;padding-bottom:4px}
+.day{position:relative;aspect-ratio:1/1;min-height:52px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:6px 8px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:background .12s}
+.day .n{font-family:var(--display);font-weight:700;font-size:clamp(17px,2.2vw,24px);line-height:1}
+.day .p{font-size:12px;color:var(--muted);font-weight:500}
+.day.wkend .p{color:var(--ink);font-weight:700}
+.day:hover:not(.past):not(.taken){background:var(--sun-2)}
+.day.past{background:transparent;border-color:transparent;color:#A9B6AF;cursor:default}
+.day.past .p{visibility:hidden}
+.day.taken{cursor:not-allowed;color:#8E9C95;background:repeating-linear-gradient(-45deg,#EEF2F0 0 6px,#E3E9E6 6px 12px);border-color:transparent}
+.day.taken .p{text-decoration:line-through}
+.day.today .n::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--leaf);margin-left:5px;vertical-align:middle}
+.day.range{background:var(--sun-2);border-color:var(--sun-2)}
+.day.start,.day.end{background:var(--sun);border-color:var(--sun)}
+.day.start .p,.day.end .p{color:var(--ink)}
+.day.end.taken{background:var(--sun);color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:7px}
+.sw{width:16px;height:16px;border-radius:5px;border:1px solid var(--line);display:inline-block}
+.sw.taken{background:repeating-linear-gradient(-45deg,#EEF2F0 0 3px,#D8E0DC 3px 6px);border:0}
+.sw.sel{background:var(--sun);border:0}
+.sw.blk{background:var(--danger-2);border:0}
+
+/* summary */
+.summary{position:sticky;top:84px}
+.summary .empty{color:var(--muted);margin:10px 0 0}
+.dates{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;margin:14px 0}
+.dates div{padding:10px 12px}
+.dates div + div{border-left:1px solid var(--line)}
+.dates small{display:block;color:var(--muted);font-size:12px;font-weight:600}
+.dates b{font-weight:600}
+.lines{list-style:none;margin:0 0 14px;padding:0;font-size:15px}
+.lines li{display:flex;justify-content:space-between;gap:10px;padding:4px 0}
+.lines li.total{border-top:1px solid var(--line);margin-top:6px;padding-top:10px;font-weight:700;font-size:17px}
+.lines li.due{color:var(--leaf);font-weight:700}
+.lines li.muted{color:var(--muted);font-size:14px}
+label.f{display:block;font-size:14px;font-weight:600;margin:12px 0 5px}
+.in{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.in:focus{border-color:var(--leaf);outline:none;box-shadow:0 0 0 3px var(--leaf-2)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pay{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.pay label{border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:600;font-size:15px;display:flex;gap:8px;align-items:center}
+.pay label:has(input:checked){border-color:var(--leaf);background:var(--leaf-2)}
+.pay input{accent-color:var(--leaf);margin:0}
+.gcash-box{background:var(--sky);border-radius:12px;padding:12px 14px;margin-top:10px;font-size:14px}
+.gcash-box b{font-size:16px}
+.err{color:var(--danger);font-size:13px;margin:6px 0 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer;background:var(--ink);color:#fff;text-decoration:none}
+.btn:hover{background:#26392F}
+.btn.block{width:100%;margin-top:16px;padding:14px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--leaf-2)}
+.btn.sm{padding:6px 11px;font-size:13px;border-radius:8px}
+.btn.ok{background:var(--leaf)}
+.btn.ok:hover{background:#255A41}
+.btn.warn{background:transparent;color:var(--danger);border:1px solid #E5C2BA}
+.btn.warn:hover{background:var(--danger-2)}
+.fine{font-size:13px;color:var(--muted);margin:10px 0 0}
+.done h2{font-size:28px;margin-bottom:6px}
+.ref{font-family:var(--display);font-size:30px;font-weight:800;letter-spacing:.01em;background:var(--sun-2);border-radius:12px;padding:10px 14px;margin:14px 0}
+
+/* admin */
+.admin-head{padding:34px 0 18px;display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}
+.admin-head h1{font-size:clamp(30px,4vw,44px);font-weight:800;letter-spacing:-.02em}
+.admin-head p{margin:4px 0 0;color:var(--muted)}
+.alert{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--sun-2);border-radius:14px;padding:12px 16px;margin-bottom:16px;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:22px}
+.stat{padding:16px 20px}
+.stat + .stat{border-left:1px solid var(--line)}
+.stat small{display:block;color:var(--muted);font-size:13px;font-weight:600}
+.stat b{font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:-.01em}
+.stat span{display:block;font-size:13px;color:var(--muted)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.tabs button{border:0;background:none;padding:10px 14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.toolbar h2{font-size:22px}
+.tbl-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:18px}
+table{border-collapse:collapse;width:100%;min-width:940px;font-size:14px}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:13px;padding:12px 14px;border-bottom:1px solid var(--line)}
+td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td .sub{display:block;color:var(--muted);font-size:13px}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.chip.pending{background:var(--sun-2);color:#7A5200}
+.chip.confirmed{background:var(--leaf-2);color:var(--leaf)}
+.chip.staying{background:var(--sky);color:#1F4B62}
+.chip.completed{background:#ECEFED;color:var(--muted)}
+.chip.cancelled{background:var(--danger-2);color:var(--danger)}
+.adm-cal .day{aspect-ratio:auto;min-height:74px;cursor:pointer}
+.adm-cal .day.bk{background:var(--leaf-2);border-color:var(--leaf-2);cursor:default}
+.adm-cal .day.bk .p{color:var(--leaf);font-weight:700}
+.adm-cal .day.pend{background:var(--sun-2);border-color:var(--sun-2)}
+.adm-cal .day.pend .p{color:#7A5200}
+.adm-cal .day.blk{background:var(--danger-2);border-color:var(--danger-2)}
+.adm-cal .day.blk .p{color:var(--danger);font-weight:700}
+.adm-cal .day:hover:not(.past):not(.bk){background:var(--sun-2)}
+.sw.bk{background:var(--leaf-2);border:0}
+.sw.pend{background:var(--sun-2);border:0}
+.rates{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.rate-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px;align-items:end;padding:14px 0;border-bottom:1px solid var(--line)}
+.rate-row:last-child{border-bottom:0}
+.rate-row label.f{margin-top:0}
+.bars{display:flex;align-items:flex-end;gap:14px;height:220px;padding-top:20px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;font-size:13px}
+.bar i{display:block;width:100%;max-width:64px;background:var(--leaf);border-radius:8px 8px 3px 3px;min-height:3px}
+.bar.cur i{background:var(--sun)}
+.bar b{font-variant-numeric:tabular-nums;font-size:12px}
+.bar span{color:var(--muted)}
+main.wrap{padding-bottom:90px}
+.occ li{display:grid;grid-template-columns:130px 1fr 48px;gap:10px;align-items:center;padding:8px 0}
+.occ{list-style:none;padding:0;margin:14px 0 0}
+.track{height:10px;background:var(--leaf-2);border-radius:99px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--leaf);border-radius:99px}
+
+dialog{border:0;border-radius:18px;padding:24px;max-width:420px;width:calc(100% - 32px);color:var(--ink)}
+dialog::backdrop{background:rgba(20,35,28,.45)}
+dialog h3{font-size:22px;margin-bottom:8px}
+dialog .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+dialog img{width:100%;border-radius:12px;border:1px solid var(--line)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:14px;z-index:50;box-shadow:0 10px 30px rgba(20,35,28,.25);max-width:calc(100% - 32px)}
+
+
+.guide{position:fixed;left:20px;bottom:20px;z-index:30;width:340px;max-width:calc(100% - 40px);background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 32px rgba(20,35,28,.16)}
+.guide-toggle{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;background:none;padding:12px 16px;cursor:pointer;font-weight:700;text-align:left}
+.guide-toggle .count{font-weight:600;font-size:13px;color:var(--muted)}
+.guide-toggle svg{transition:transform .15s}
+.guide[data-open="false"] .guide-toggle svg{transform:rotate(180deg)}
+.guide[data-open="false"]{width:auto}
+.guide-body{padding:0 16px 14px;max-height:min(62vh,520px);overflow:auto}
+.guide-bar{height:6px;background:var(--leaf-2);border-radius:99px;margin-bottom:10px;overflow:hidden}
+.guide-bar i{display:block;height:100%;background:var(--leaf);border-radius:99px;transition:width .2s}
+.guide ol{list-style:none;margin:0;padding:0;counter-reset:g}
+.guide li{display:grid;grid-template-columns:26px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--line);counter-increment:g}
+.guide li:first-child{border-top:0}
+.guide li::before{content:counter(g);width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--muted)}
+.guide li.ok::before{content:"✓";background:var(--leaf);border-color:var(--leaf);color:#fff}
+.guide li b{display:block;font-size:14px}
+.guide li.ok p{display:none}
+.guide.pulse{animation:gpulse 1.2s ease-out}
+@keyframes gpulse{0%{box-shadow:0 0 0 0 rgba(47,107,79,.55)}100%{box-shadow:0 0 0 14px rgba(47,107,79,0)}}
+@media (prefers-reduced-motion:reduce){.guide.pulse{animation:none}}
+.guide li.ok b{color:var(--muted);text-decoration:line-through}
+.guide li p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.guide li button{margin-top:6px}
+.guide-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:13px;color:var(--muted)}
+.guide-foot button{border:0;background:none;color:var(--leaf);font-weight:600;cursor:pointer;padding:4px}
+@media (max-width:560px){.guide{left:10px;right:10px;bottom:10px;max-width:none;width:auto}.guide[data-open="false"]{right:auto}}
+
+
+/* guest home */
+.hero{position:relative;margin-top:24px;border-radius:24px;overflow:hidden;background:#CFE4EE}
+.hero #hero-art svg{display:block;width:100%;height:clamp(340px,44vw,540px)}
+.hero-card{position:absolute;left:28px;bottom:28px;width:min(470px,calc(100% - 56px));background:rgba(255,255,255,.96);border-radius:18px;padding:24px 26px}
+.hero-card h1{font-size:clamp(30px,3.8vw,46px);font-weight:800;letter-spacing:-.025em}
+.hero-card p{margin:10px 0 18px;color:var(--muted)}
+.hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+.facts-row{display:flex;flex-wrap:wrap;gap:6px 28px;margin:16px 4px 0;color:var(--muted);font-size:15px}
+.facts-row b{color:var(--ink);font-weight:600}
+.sec{padding-top:64px}
+.sec h2{font-size:clamp(26px,3vw,34px);font-weight:800;letter-spacing:-.02em;margin-bottom:10px}
+.panel h2{font-size:24px}
+.sec .lead{color:var(--muted);max-width:62ch;margin:0 0 22px}
+.about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:40px;align-items:start}
+.about p{max-width:60ch;margin:0 0 14px}
+.gallery{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gallery figure{margin:0}
+.gallery .g-wide{grid-column:1/-1}
+.gallery svg{display:block;width:100%;height:auto;border-radius:14px}
+.gallery figcaption{font-size:13px;color:var(--muted);padding:6px 2px 0}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.rcard{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+.rcard svg{display:block;width:100%;height:auto}
+.rcard .b{padding:18px 20px 20px;display:flex;flex-direction:column;flex:1}
+.rcard h3{font-size:23px;font-weight:700;letter-spacing:-.01em}
+.rcard .meta{color:var(--muted);font-size:14px;margin:4px 0 10px}
+.rcard .d{margin:0 0 10px}
+.rcard ul{margin:0 0 16px;padding-left:18px;font-size:14px;color:var(--muted)}
+.rcard ul li{margin:3px 0}
+.rcard .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:14px;border-top:1px solid var(--line)}
+.rcard .foot .btn{white-space:nowrap}
+.rcard .price{font-size:13px;color:var(--muted);line-height:1.3}
+.rcard .price b{display:block;font-family:var(--display);font-size:24px;color:var(--ink)}
+.amen{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));column-gap:32px}
+.amen div{padding:14px 0;border-top:1px solid var(--line)}
+.amen b{display:block}
+.amen span{color:var(--muted);font-size:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.plist{list-style:none;margin:8px 0 0;padding:0}
+.plist li{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
+.plist li:first-child{border-top:0}
+.plist b{font-weight:600;text-align:right;white-space:nowrap}
+.pol{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.pol div{border-left:3px solid var(--leaf);padding:2px 0 2px 16px}
+.pol p{margin:4px 0 0;color:var(--muted);font-size:15px}
+.faq{max-width:760px}
+.faq details{border-top:1px solid var(--line);padding:14px 0}
+.faq details:last-child{border-bottom:1px solid var(--line)}
+.faq summary{font-weight:600;cursor:pointer;font-size:17px}
+.faq p{margin:8px 0 0;color:var(--muted);max-width:64ch}
+.cta{display:flex;justify-content:space-between;align-items:center;gap:20px;background:var(--sky);border-radius:20px;padding:28px 30px;flex-wrap:wrap}
+.cta h2{margin:0}
+.cta p{margin:6px 0 0;color:#2C4654}
+.book-head{padding:28px 0 22px}
+.book-head h1{font-size:clamp(32px,4.5vw,48px);font-weight:800;letter-spacing:-.025em;margin-top:10px}
+.book-head p{margin:6px 0 0;color:var(--muted)}
+.back{color:var(--leaf);font-weight:600;text-decoration:none;font-size:15px}
+.back::before{content:"‹ ";font-size:18px}
+.back:hover{text-decoration:underline}
+@media (max-width:960px){
+  .about,.two{grid-template-columns:1fr}
+  .pol{grid-template-columns:1fr}
+}
+@media (max-width:700px){
+  .hero{border-radius:18px;background:var(--card);border:1px solid var(--line)}
+  .hero #hero-art svg{height:240px}
+  .hero-card{position:static;width:auto;border-radius:0;padding:20px}
+  .rgrid{grid-template-columns:1fr}
+}
+
+@media (max-width:960px){
+  .book-grid{grid-template-columns:1fr}
+  .summary{position:static}
+  .intro{grid-template-columns:1fr;gap:14px}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat:nth-child(3){border-left:0}
+  .stat:nth-child(n+3){border-top:1px solid var(--line)}
+  .rates{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .demo-note{display:none}
+  .switch a{padding:7px 11px}
+  .brand span{display:none}
+  .cal{gap:4px}
+  .day{min-height:44px;padding:4px 5px;border-radius:9px}
+  .day .p{font-size:10px}
+  .panel{padding:16px}
+  .room{grid-template-columns:auto 1fr;}
+  .room .from{grid-column:2;text-align:left}
+  .room .from b{display:inline;font-size:16px;margin-right:4px}
+  .rate-row{grid-template-columns:1fr 1fr}
+  .rate-row > div:first-child{grid-column:1/-1}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#guest" aria-label="Lantaw home">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M2 25 L13 7 Q15 4 17 7 L28 25 Z" fill="#2F6B4F"/><path d="M11.2 10 Q15 12.5 18.8 10 L17 7 Q15 4 13 7Z" fill="#F2B33D"/><rect x="1" y="25" width="28" height="2.5" rx="1.25" fill="#14231C"/></svg>
+      Lantaw <span class="demo-note">booking system demo</span>
+    </a>
+    <nav class="switch" aria-label="Demo views">
+      <a href="#guest" id="nav-guest">Guest site</a>
+      <a href="#admin" id="nav-admin">Owner admin</a>
+    </nav>
+  </div>
+</header>
+
+<!-- GUEST HOME -->
+<main id="view-guest" class="wrap">
+  <section class="hero">
+    <div id="hero-art"></div>
+    <div class="hero-card">
+      <h1>Wake up to Mayon from the roof deck.</h1>
+      <p>Lantaw Inn is a small family-run inn in Legazpi City, Albay. Clean rooms, hot showers and fast Wi-Fi at local prices. Book direct with the owner and skip the booking-site fees.</p>
+      <div class="hero-actions">
+        <a class="btn" href="#book">Check dates and book</a>
+        <a class="btn ghost" href="#rooms-sec" id="see-rooms">See the rooms</a>
+      </div>
+    </div>
+  </section>
+  <p class="facts-row" id="facts-row"></p>
+
+  <section class="sec about" aria-labelledby="about-h">
+    <div>
+      <h2 id="about-h">About the inn</h2>
+      <p>Lantaw Inn has five room types across three floors, from a budget single for solo travelers to a family room that sleeps six. The owners live on the ground floor, so there's always someone around to help with directions, tricycle rides or a late check-in.</p>
+      <p>The best spot in the house is the roof deck. On clear mornings Mayon Volcano fills the view, and most guests end up having their coffee up there. In the evening it's a quiet place to sit after a day at Cagsawa or the Embarcadero.</p>
+      <p>We're on a quiet side street, a short ride from the city center, SM City Legazpi and the bay. The exact address is sent with your booking confirmation.</p>
+    </div>
+    <div class="gallery">
+      <figure class="g-wide"><div id="art-deck"></div><figcaption>The roof deck, open to all guests from 5 AM to 10 PM</figcaption></figure>
+      <figure><div id="art-lobby"></div><figcaption>The lobby and front desk</figcaption></figure>
+      <figure><div id="art-kitchen"></div><figcaption>The shared kitchen</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="sec" id="rooms-sec" aria-labelledby="rooms-h">
+    <h2 id="rooms-h">Rooms</h2>
+    <p class="lead">All rooms have aircon, Wi-Fi, fresh towels and toiletries. Friday and Saturday nights cost a little more.</p>
+    <div class="rgrid" id="home-rooms"></div>
+  </section>
+
+  <section class="sec" aria-labelledby="amen-h">
+    <h2 id="amen-h">What's included</h2>
+    <div class="amen">
+      <div><b>Fiber Wi-Fi</b><span>Fast enough for video calls, in every room and on the roof deck</span></div>
+      <div><b>Hot showers</b><span>Water heaters in every bathroom</span></div>
+      <div><b>Roof deck</b><span>Chairs, tables and a clear view of Mayon</span></div>
+      <div><b>Shared kitchen</b><span>Fridge, stove, rice cooker, plates and cutlery</span></div>
+      <div><b>Free parking</b><span>Space for four cars inside the gate</span></div>
+      <div><b>Drinking water</b><span>Free purified water refills on every floor</span></div>
+      <div><b>Laundry</b><span>Wash, dry and fold for ₱150 per load, ready the same day</span></div>
+      <div><b>Airport pickup</b><span>From Bicol International Airport for ₱600 per trip, booked a day ahead</span></div>
+      <div><b>Tour help</b><span>We can arrange ATV rides, Cagsawa trips and van hire with local guides we know</span></div>
+      <div><b>Safe and secure</b><span>Gated, with CCTV in the halls and staff on site 24 hours</span></div>
+    </div>
+  </section>
+
+  <section class="sec two" aria-label="Location and house rules">
+    <div class="panel">
+      <h2>Getting around</h2>
+      <p class="fine" style="margin:4px 0 8px">Approximate travel times by car or tricycle from the inn.</p>
+      <ul class="plist">
+        <li><span>SM City Legazpi</span><b>10 min</b></li>
+        <li><span>Embarcadero de Legazpi and the boulevard</span><b>10 min</b></li>
+        <li><span>Legazpi Grand Central Terminal</span><b>10 min</b></li>
+        <li><span>Lignon Hill Nature Park</span><b>15 min</b></li>
+        <li><span>Cagsawa Ruins, Daraga</span><b>25 min</b></li>
+        <li><span>Bicol International Airport, Daraga</span><b>40 min</b></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h2>House rules</h2>
+      <ul class="plist">
+        <li><span>Check-in</span><b>2 PM onward</b></li>
+        <li><span>Check-out</span><b>Until 11 AM</b></li>
+        <li><span>Quiet hours</span><b>10 PM to 7 AM</b></li>
+        <li><span>Smoking</span><b>Ground-floor area only</b></li>
+        <li><span>Visitors</span><b>Lobby only, until 9 PM</b></li>
+        <li><span>Pets</span><b>Not allowed</b></li>
+      </ul>
+      <p class="fine">Please bring a valid ID for each adult guest. We need it at check-in.</p>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="pol-h">
+    <h2 id="pol-h">Payment and cancellation</h2>
+    <div class="pol">
+      <div><b>Down payment</b><p id="pol-down"></p></div>
+      <div><b>Cancellation</b><p>Cancel up to 3 days before check-in and we refund your down payment in full. After that, the down payment is not refunded.</p></div>
+      <div><b>Typhoons and volcano alerts</b><p>If PAGASA raises a storm signal over Albay, or PHIVOLCS raises Mayon's alert level, for your dates, you can move your booking to new dates for free.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions guests ask</h2>
+    <div class="faq">
+      <details><summary>Is breakfast included?</summary><p>No, but you can order a Filipino breakfast (longganisa, tapa or tocino with rice, egg and coffee) for ₱180 the night before. You're also free to cook in the shared kitchen.</p></details>
+      <details><summary>Can I check in early or check out late?</summary><p>If your room is ready, early check-in is free. Late check-out until 2 PM costs ₱300 if nobody is checking in after you. Message us on the day.</p></details>
+      <details><summary>Do you accept walk-in guests?</summary><p>Yes, if a room is free. Booking online is safer, especially from December to May and during the Ibalong Festival in August.</p></details>
+      <details><summary>Can I see Mayon from my room?</summary><p>From the Deluxe double and the Family room, yes. From every room you can walk up to the roof deck. Mayon is clearest early in the morning.</p></details>
+      <details><summary>How do I pay the balance?</summary><p>Pay the rest at check-in, in cash or by GCash.</p></details>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="cta">
+      <div>
+        <h2>Ready to book your stay?</h2>
+        <p>Pick your room and dates and see the full price right away. Questions? Text or call <b>0917 555 0142</b>.</p>
+      </div>
+      <a class="btn" href="#book">Check dates and book</a>
+    </div>
+  </section>
+</main>
+
+<!-- BOOKING PAGE -->
+<main id="view-book" class="wrap" hidden>
+  <div class="book-head">
+    <a href="#guest" class="back">Back to Lantaw Inn</a>
+    <h1>Book your stay</h1>
+    <p>Choose a room, then your check-in and check-out dates.</p>
+  </div>
+  <div class="book-grid">
+    <div>
+      <fieldset class="rooms" id="rooms"><legend>Room</legend></fieldset>
+      <section class="panel" aria-labelledby="cal-title">
+        <div class="cal-head">
+          <div>
+            <h2 id="cal-title" class="cal-month"></h2>
+          </div>
+          <div class="cal-nav">
+            <button class="icon-btn" id="g-prev" aria-label="Previous month"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+            <button class="icon-btn" id="g-next" aria-label="Next month"><svg width="16" height="16" viewBox="0 0 16 16"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+          </div>
+        </div>
+        <p class="cal-hint" id="g-hint"></p>
+        <div class="cal" id="g-cal" role="grid"></div>
+        <div class="legend">
+          <span><i class="sw"></i>Available, price per night</span>
+          <span><i class="sw taken"></i>Booked</span>
+          <span><i class="sw sel"></i>Your stay</span>
+        </div>
+      </section>
+    </div>
+    <aside class="summary panel" id="summary" aria-live="polite"></aside>
+  </div>
+</main>
+
+<!-- ADMIN -->
+<main id="view-admin" class="wrap" hidden>
+  <div class="admin-head">
+    <div>
+      <h1>Owner admin</h1>
+      <p>Lantaw Inn, Legazpi City</p>
+    </div>
+    <button class="btn ghost sm" id="reset">Reset demo data</button>
+  </div>
+  <div id="alert"></div>
+  <div class="stats" id="stats"></div>
+  <div class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-tab="bookings">Bookings</button>
+    <button role="tab" data-tab="calendar">Calendar</button>
+    <button role="tab" data-tab="rates">Rooms &amp; rates</button>
+    <button role="tab" data-tab="reports">Reports</button>
+  </div>
+
+  <section id="tab-bookings" role="tabpanel">
+    <div class="toolbar">
+      <h2>Bookings</h2>
+      <label>Show
+        <select class="in" id="filter" style="width:auto;display:inline-block;margin-left:6px">
+          <option value="all">All bookings</option>
+          <option value="pending">Waiting for approval</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </label>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Reference</th><th>Guest</th><th>Room</th><th>Stay</th><th>Total</th><th>Paid</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+  </section>
+
+  <section id="tab-calendar" role="tabpanel" hidden>
+    <div class="toolbar">
+      <h2>Availability</h2>
+      <select class="in" id="a-room" style="width:auto"></select>
+    </div>
+    <div class="panel">
+      <div class="cal-head">
+        <h2 class="cal-month" id="a-month"></h2>
+        <div class="cal-nav">
+          <button class="icon-btn" id="a-prev" aria-label="Previous month"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+          <button class="icon-btn" id="a-next" aria-label="Next month"><svg width="16" height="16" viewBox="0 0 16 16"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+      <p class="cal-hint">Click an open date to block it, for repairs or a walk-in guest. Click a blocked date to open it again.</p>
+      <div class="cal adm-cal" id="a-cal"></div>
+      <div class="legend">
+        <span><i class="sw bk"></i>Confirmed booking</span>
+        <span><i class="sw pend"></i>Waiting for approval</span>
+        <span><i class="sw blk"></i>Blocked by owner</span>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:20px">
+      <h2>Calendar sync</h2>
+      <p class="fine" style="margin-top:6px">Paste your Airbnb or Booking.com calendar link so dates booked there are blocked here too.</p>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <input class="in" id="ical" style="flex:1;min-width:220px" placeholder="https://www.airbnb.com/calendar/ical/....ics" aria-label="Calendar link">
+        <button class="btn" id="sync">Connect calendar</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-rates" role="tabpanel" hidden>
+    <div class="rates">
+      <div class="panel">
+        <h2>Room rates</h2>
+        <div id="rate-rows"></div>
+      </div>
+      <div class="panel">
+        <h2>Fees and payments</h2>
+        <label class="f" for="s-clean">Cleaning fee per stay (₱)</label>
+        <input class="in" type="number" min="0" id="s-clean">
+        <label class="f" for="s-down">Down payment to confirm a booking (%)</label>
+        <input class="in" type="number" min="0" max="100" id="s-down">
+        <label class="f" for="s-gcash">GCash number shown to guests</label>
+        <input class="in" id="s-gcash">
+        <p class="fine">Guests see new rates as soon as you save. Existing bookings keep the price they booked at.</p>
+      </div>
+    </div>
+    <button class="btn" id="save-rates" style="margin-top:18px">Save rates</button>
+  </section>
+
+  <section id="tab-reports" role="tabpanel" hidden>
+    <div class="rates">
+      <div class="panel">
+        <h2>Money received, last 6 months</h2>
+        <div class="bars" id="bars"></div>
+      </div>
+      <div class="panel">
+        <h2>Occupancy this month</h2>
+        <ul class="occ" id="occ"></ul>
+        <p class="fine" id="occ-note"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<aside class="guide" id="guide" data-open="true" aria-label="Demo guide">
+  <button class="guide-toggle" id="guide-toggle" aria-expanded="true" aria-controls="guide-body">
+    <span>What you can try <span class="count" id="guide-count"></span></span>
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="m3 5 4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <div class="guide-body" id="guide-body">
+    <div class="guide-bar"><i id="guide-bar"></i></div>
+    <ol id="guide-list"></ol>
+    <div class="guide-foot"><span>Steps tick off as you do them.</span><button id="guide-reset">Start over</button></div>
+  </div>
+</aside>
+
+<dialog id="dlg"><div id="dlg-body"></div></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+const pad = n => String(n).padStart(2,'0');
+const key = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y,m-1,d); };
+const addDays = (k,n) => { const d = parse(k); d.setDate(d.getDate()+n); return key(d); };
+const nights = (a,b) => Math.round((parse(b)-parse(a))/864e5);
+const peso = n => '₱' + Math.round(n).toLocaleString('en-PH');
+const short = n => (n/1000).toFixed(n%1000===0?0:1) + 'k';
+const fmt = k => parse(k).toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric'});
+const fmtShort = k => parse(k).toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = id => document.getElementById(id);
+const TODAY = key(new Date());
+const isWeekendNight = k => { const d = parse(k).getDay(); return d === 5 || d === 6; };
+const SAMPLE_PROOF = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="420"><rect width="320" height="420" fill="#EAF0F6"/><rect x="24" y="30" width="272" height="48" rx="10" fill="#C9D7E6"/><rect x="24" y="100" width="180" height="16" rx="8" fill="#C9D7E6"/><rect x="24" y="130" width="230" height="16" rx="8" fill="#C9D7E6"/><rect x="24" y="190" width="272" height="90" rx="12" fill="#fff"/><text x="160" y="245" font-family="sans-serif" font-size="18" text-anchor="middle" fill="#6B7C8F">Sample screenshot</text><text x="160" y="330" font-family="sans-serif" font-size="13" text-anchor="middle" fill="#6B7C8F">Demo only, not a real payment</text></svg>');
+
+/* ---------- data ---------- */
+function freshState(){
+  const rooms = [
+    {id:'single', name:'Budget single', sleeps:1, base:950, weekend:150, beds:'1 single bed', size:'10 m²', desc:'A small, quiet room for solo travelers on a budget.', perks:['Aircon and electric fan','Shared bathroom with hot shower, two rooms per bathroom','Desk and wall hooks']},
+    {id:'twin', name:'Standard twin', sleeps:2, base:1350, weekend:200, beds:'2 single beds', size:'14 m²', desc:'Two beds for friends, coworkers or a parent and child.', perks:['Private bathroom with hot shower','Aircon and smart TV','Bedside table and reading lamp']},
+    {id:'deluxe', name:'Deluxe double', sleeps:3, base:1800, weekend:250, beds:'1 double bed + 1 pull-out bed', size:'18 m²', desc:'Our couples\' favorite. The window looks straight at Mayon.', perks:['Window facing Mayon','Private bathroom with hot shower','Smart TV, mini fridge and electric kettle']},
+    {id:'triple', name:'Triple room', sleeps:3, base:2100, weekend:300, beds:'3 single beds', size:'20 m²', desc:'Three proper beds, so nobody gets the floor. Good for barkadas.', perks:['Private bathroom with hot shower','Aircon and smart TV','Lockers for each guest']},
+    {id:'family', name:'Family room', sleeps:6, base:3200, weekend:400, beds:'2 double beds + 1 bunk bed', size:'28 m²', desc:'Our biggest room, on the top floor next to the roof deck.', perks:['Small balcony with a Mayon view','Private bathroom with hot shower','Mini fridge, electric kettle and dining table']}
+  ];
+  const s = {rooms, settings:{cleaning:200, down:50, gcash:'0917 555 0142'}, bookings:[], blocked:{single:[],twin:[],deluxe:[],triple:[],family:[]}, seq:1001};
+  const names = ['Andrea Lim','Paolo Reyes','Joanna Cruz','Mark Villanueva','Liza Bautista','Kevin Santos','Rhea Dela Cruz','Carlo Mendoza','Bea Ramos','Nico Aquino','Trisha Garcia','Jerome Tan','Camille Navarro','Ramon Flores','Ella Ocampo','Miguel Torres','Sheila Gomez','Arvin Castro'];
+  let i = 0;
+  const mk = (room, off, len, status, method) => {
+    const ci = addDays(TODAY, off), co = addDays(ci, len);
+    const total = quote(s, room, ci, co).total;
+    const down = Math.round(total * s.settings.down/100);
+    const paid = status === 'completed' ? total : status === 'confirmed' ? down : 0;
+    s.bookings.push({ref:'LTW-'+(s.seq++), roomId:room, guest:names[i % names.length], phone:'09'+(17+i%10)+' '+(100+(i*137)%900)+' '+(1000+(i*2311)%9000), guests: 2 + (i%3), checkIn:ci, checkOut:co, total, down, paid, status: status==='completed'?'confirmed':status, method, proof: method==='GCash'? SAMPLE_PROOF : null, created:addDays(ci,-6)});
+    i++;
+  };
+  [[-160,'family',3],[-150,'deluxe',2],[-131,'single',4],[-118,'family',2],[-104,'deluxe',3],[-96,'family',4],[-80,'triple',2],[-71,'deluxe',2],[-66,'family',3],[-52,'twin',3],[-44,'family',2],[-38,'triple',4],[-27,'family',3],[-21,'twin',2],[-15,'single',3],[-9,'deluxe',2]]
+    .forEach(([o,r,l],n) => mk(r,o,l,'completed', n%3 ? 'GCash' : 'Card'));
+  mk('family',-1,3,'confirmed','GCash');
+  mk('deluxe',2,2,'confirmed','Card');
+  mk('twin',4,3,'pending','GCash');
+  mk('family',6,2,'pending','GCash');
+  mk('triple',9,4,'confirmed','GCash');
+  mk('family',13,3,'confirmed','Card');
+  mk('twin',17,2,'confirmed','GCash');
+  mk('deluxe',22,2,'pending','GCash');
+  mk('family',26,4,'confirmed','GCash');
+  mk('single',31,3,'confirmed','Card');
+  mk('family',40,2,'pending','GCash');
+  s.bookings[s.bookings.length-6].status = 'cancelled';
+  s.blocked.family = [addDays(TODAY,10), addDays(TODAY,11)];
+  return s;
+}
+function quote(s, roomId, ci, co){
+  const r = s.rooms.find(x => x.id === roomId);
+  let wk = 0, we = 0;
+  for (let k = ci; k < co; k = addDays(k,1)) isWeekendNight(k) ? we++ : wk++;
+  const sub = wk*r.base + we*(r.base + r.weekend);
+  const total = sub + s.settings.cleaning;
+  return {wk, we, sub, total, down: Math.round(total*s.settings.down/100), room:r};
+}
+
+let S;
+try { S = JSON.parse(localStorage.getItem('lantaw-demo-v3')); } catch(e) {}
+if (!S || !S.rooms) S = freshState();
+const save = () => { try { localStorage.setItem('lantaw-demo-v3', JSON.stringify(S)); } catch(e) {} };
+
+const room = id => S.rooms.find(r => r.id === id);
+const active = b => b.status !== 'cancelled';
+const bookingOn = (roomId, k) => S.bookings.find(b => active(b) && b.roomId === roomId && b.checkIn <= k && k < b.checkOut);
+const isBlocked = (roomId, k) => (S.blocked[roomId] || []).includes(k);
+const taken = (roomId, k) => !!bookingOn(roomId,k) || isBlocked(roomId,k);
+const rangeFree = (roomId, a, b) => { for (let k=a; k<b; k=addDays(k,1)) if (taken(roomId,k)) return false; return true; };
+const nightPrice = (r, k) => r.base + (isWeekendNight(k) ? r.weekend : 0);
+const statusOf = b => {
+  if (b.status === 'cancelled') return 'cancelled';
+  if (b.status === 'pending') return 'pending';
+  if (b.checkOut <= TODAY) return 'completed';
+  if (b.checkIn <= TODAY) return 'staying';
+  return 'confirmed';
+};
+const STATUS_LABEL = {pending:'Waiting for approval', confirmed:'Confirmed', staying:'Staying now', completed:'Completed', cancelled:'Cancelled'};
+
+/* ---------- ui helpers ---------- */
+let toastT;
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2800); }
+function dialog(html, onReady){ $('dlg-body').innerHTML = html; const d = $('dlg'); if (!d.open) d.showModal(); onReady && onReady(d); }
+$('dlg').addEventListener('click', e => { if (e.target.closest('[data-close]') || e.target === $('dlg')) $('dlg').close(); });
+
+function monthCells(y, m){
+  const first = new Date(y,m,1).getDay(), days = new Date(y,m+1,0).getDate();
+  const cells = [];
+  for (let i=0;i<first;i++) cells.push(null);
+  for (let d=1; d<=days; d++) cells.push(key(new Date(y,m,d)));
+  return cells;
+}
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const monthTitle = d => d.toLocaleDateString('en-PH',{month:'long',year:'numeric'});
+const thisMonth = () => { const d = parse(TODAY); return new Date(d.getFullYear(), d.getMonth(), 1); };
+
+/* ---------- illustrations (placeholders for real photos) ---------- */
+const C = {mayon:'#7D9387', mayonLite:'#A6B8AE', leaf:'#2F6B4F', hill:'#5E8B70', hill2:'#9FBDAC', wood:'#8A5A3B', wood2:'#B07C55', sea:'#8DB9CC', glass:'#A9CEDD'};
+function mayonSVG(cx, base, h, w, plume){
+  const l = cx-w/2, r = cx+w/2, top = base-h, cw = w*0.03;
+  let s = `<path d="M${l} ${base} C ${cx-w*0.2} ${base-h*0.32}, ${cx-w*0.07} ${top+h*0.14}, ${cx-cw} ${top} L ${cx+cw} ${top} C ${cx+w*0.07} ${top+h*0.14}, ${cx+w*0.2} ${base-h*0.32}, ${r} ${base} Z" fill="${C.mayon}"/>`;
+  s += `<path d="M${cx-cw} ${top} L ${cx-w*0.055} ${top+h*0.42} L ${cx-cw*0.2} ${top+h*0.2} L ${cx+w*0.015} ${top+h*0.5} L ${cx+cw*0.5} ${top+h*0.16} L ${cx+w*0.065} ${top+h*0.36} L ${cx+cw} ${top} Z" fill="${C.mayonLite}"/>`;
+  if (plume) s += `<g fill="#fff" opacity=".8"><ellipse cx="${cx+w*0.02}" cy="${top-h*0.05}" rx="${w*0.03}" ry="${h*0.04}"/><ellipse cx="${cx+w*0.07}" cy="${top-h*0.1}" rx="${w*0.05}" ry="${h*0.05}"/><ellipse cx="${cx+w*0.14}" cy="${top-h*0.13}" rx="${w*0.06}" ry="${h*0.045}"/></g>`;
+  return s;
+}
+function palmSVG(x, b, dir, sc=1){
+  const tx = x+10*dir*sc, ty = b-170*sc;
+  let s = `<path d="M${x} ${b} C ${x+6*dir*sc} ${b-60*sc}, ${x+18*dir*sc} ${b-120*sc}, ${tx} ${ty}" stroke="#7A5A3A" stroke-width="${9*sc}" fill="none" stroke-linecap="round"/>`;
+  [[-70,10],[-50,-25],[0,-40],[50,-25],[70,12]].forEach(([dx,dy]) => {
+    s += `<path d="M${tx} ${ty} q ${dx*0.5*sc} ${(dy-25)*sc} ${dx*sc} ${(dy+20)*sc}" stroke="${C.leaf}" stroke-width="${9*sc}" fill="none" stroke-linecap="round"/>`;
+  });
+  return s;
+}
+function innSVG(x, b){
+  const w = 340, fh = 72; let s = '';
+  s += `<rect x="${x}" y="${b-3*fh}" width="${w}" height="${3*fh}" fill="#FBFCFB"/>`;
+  for (let i=1;i<3;i++) s += `<rect x="${x-6}" y="${b-i*fh-5}" width="${w+12}" height="8" fill="${C.wood}"/>`;
+  for (let f=1; f<3; f++) for (let j=0; j<4; j++) {
+    const wx = x+22+j*80, wy = b-(f+1)*fh+16;
+    s += `<rect x="${wx}" y="${wy}" width="54" height="40" rx="3" fill="${C.glass}" stroke="${C.wood}" stroke-width="4"/><line x1="${wx+27}" y1="${wy}" x2="${wx+27}" y2="${wy+40}" stroke="${C.wood}" stroke-width="3"/>`;
+  }
+  s += `<rect x="${x+22}" y="${b-56}" width="90" height="38" rx="3" fill="${C.glass}" stroke="${C.wood}" stroke-width="4"/><rect x="${x+228}" y="${b-56}" width="90" height="38" rx="3" fill="${C.glass}" stroke="${C.wood}" stroke-width="4"/>`;
+  s += `<rect x="${x+140}" y="${b-58}" width="60" height="58" fill="${C.wood}"/><rect x="${x+146}" y="${b-52}" width="22" height="52" fill="${C.wood2}"/><rect x="${x+172}" y="${b-52}" width="22" height="52" fill="${C.wood2}"/>`;
+  s += `<path d="M${x+128} ${b-60} L${x+212} ${b-60} L${x+204} ${b-72} L${x+136} ${b-72} Z" fill="#F2B33D"/>`;
+  // roof deck
+  const rt = b-3*fh;
+  s += `<rect x="${x-4}" y="${rt-6}" width="${w+8}" height="8" fill="${C.wood}"/>`;
+  for (let k=0;k<=17;k++) s += `<rect x="${x+k*20}" y="${rt-30}" width="3" height="26" fill="${C.wood}"/>`;
+  s += `<rect x="${x-2}" y="${rt-32}" width="${w+4}" height="4" fill="${C.wood}"/>`;
+  s += `<path d="M${x+250} ${rt-58} q 30 -26 60 0 Z" fill="#F2B33D"/><rect x="${x+278}" y="${rt-58}" width="3" height="54" fill="${C.wood}"/>`;
+  s += `<rect x="${x+90}" y="${rt-60}" width="150" height="26" rx="4" fill="${C.leaf}"/><text x="${x+165}" y="${rt-42}" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="15" fill="#fff" text-anchor="middle" letter-spacing="1">LANTAW INN</text>`;
+  // plants
+  [x+8, x+118, x+214, x+316].forEach(px => s += `<rect x="${px}" y="${b-16}" width="16" height="16" fill="${C.wood2}"/><circle cx="${px+8}" cy="${b-22}" r="11" fill="${C.leaf}"/>`);
+  return s;
+}
+function heroArt(){
+  return `<svg viewBox="0 0 1200 540" preserveAspectRatio="xMidYMax slice" role="img" aria-label="Illustration of Lantaw Inn with Mayon Volcano behind it">
+  <defs><linearGradient id="g-hsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9D8E7"/><stop offset="1" stop-color="#EEF5F6"/></linearGradient></defs>
+  <rect width="1200" height="540" fill="url(#g-hsky)"/>
+  <circle cx="1060" cy="100" r="44" fill="#F7D27A"/>
+  <g fill="#fff" opacity=".85"><ellipse cx="200" cy="120" rx="70" ry="16"/><ellipse cx="250" cy="106" rx="44" ry="16"/><ellipse cx="930" cy="190" rx="60" ry="13"/></g>
+  ${mayonSVG(560, 420, 330, 820, true)}
+  <path d="M0 395 C 200 360, 380 390, 560 380 S 900 350, 1200 380 L1200 540 L0 540Z" fill="${C.hill2}"/>
+  <path d="M0 450 C 250 425, 500 460, 760 440 S 1050 430, 1200 445 L1200 540 L0 540Z" fill="${C.hill}"/>
+  <rect y="500" width="1200" height="40" fill="${C.leaf}"/>
+  ${palmSVG(700, 505, -1)}
+  ${innSVG(760, 502)}
+  ${palmSVG(1150, 505, 1, .9)}
+  </svg>`;
+}
+function deckArt(){
+  return `<svg viewBox="0 0 640 300" role="img" aria-label="Illustration of the roof deck facing Mayon">
+  <defs><linearGradient id="g-dsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C5DEEA"/><stop offset="1" stop-color="#F8E2B6"/></linearGradient></defs>
+  <rect width="640" height="300" fill="url(#g-dsky)"/>
+  ${mayonSVG(330, 215, 165, 420, true)}
+  <path d="M0 200 C 150 185, 300 205, 460 195 S 600 190, 640 198 L640 300 L0 300Z" fill="${C.hill2}"/>
+  <rect y="232" width="640" height="68" fill="${C.wood2}"/>
+  ${[0,1,2,3,4].map(i=>`<line x1="0" y1="${240+i*13}" x2="640" y2="${240+i*13}" stroke="${C.wood}" stroke-width="1.5" opacity=".5"/>`).join('')}
+  <rect y="196" width="640" height="6" fill="${C.wood}"/>
+  ${Array.from({length:22},(_,i)=>`<rect x="${i*30+4}" y="198" width="4" height="36" fill="${C.wood}"/>`).join('')}
+  <g><rect x="130" y="222" width="70" height="8" rx="2" fill="#fff"/><rect x="130" y="200" width="8" height="30" fill="#fff"/><rect x="134" y="230" width="5" height="34" fill="#fff"/><rect x="192" y="230" width="5" height="34" fill="#fff"/></g>
+  <g><rect x="380" y="222" width="70" height="8" rx="2" fill="#fff"/><rect x="442" y="200" width="8" height="30" fill="#fff"/><rect x="384" y="230" width="5" height="34" fill="#fff"/><rect x="442" y="230" width="5" height="34" fill="#fff"/></g>
+  <rect x="250" y="226" width="90" height="8" rx="3" fill="#FBFCFB"/><rect x="292" y="234" width="6" height="34" fill="#FBFCFB"/>
+  <rect x="270" y="214" width="12" height="13" rx="2" fill="#F2B33D"/><rect x="306" y="214" width="12" height="13" rx="2" fill="#fff" stroke="#C9D3CE"/>
+  <rect x="560" y="236" width="36" height="34" fill="${C.wood}"/><circle cx="578" cy="222" r="24" fill="${C.leaf}"/><circle cx="566" cy="208" r="14" fill="${C.hill}"/>
+  </svg>`;
+}
+function lobbyArt(){
+  return `<svg viewBox="0 0 320 220" role="img" aria-label="Illustration of the lobby">
+  <rect width="320" height="220" fill="#F1EBDD"/><rect y="168" width="320" height="52" fill="#D8C2A3"/>
+  <rect x="34" y="34" width="96" height="66" fill="#fff" stroke="${C.wood}" stroke-width="5"/><rect x="40" y="40" width="84" height="54" fill="#CFE4EE"/>${mayonSVG(82, 94, 40, 70, false)}
+  <rect x="170" y="110" width="120" height="62" fill="${C.wood}"/><rect x="164" y="104" width="132" height="10" fill="${C.wood2}"/>
+  <rect x="244" y="92" width="16" height="12" rx="6" fill="#F2B33D"/><rect x="190" y="90" width="34" height="14" rx="2" fill="#fff"/>
+  <rect x="30" y="150" width="110" height="10" rx="3" fill="${C.wood2}"/><rect x="36" y="160" width="6" height="22" fill="${C.wood}"/><rect x="128" y="160" width="6" height="22" fill="${C.wood}"/>
+  <rect x="40" y="136" width="30" height="16" rx="6" fill="${C.leaf}"/><rect x="76" y="136" width="30" height="16" rx="6" fill="#F2B33D"/>
+  <rect x="146" y="148" width="18" height="26" fill="${C.wood}"/><path d="M155 150 C 140 130, 140 110, 150 100 M155 150 C 160 125, 170 115, 178 108 M155 150 C 150 128, 158 112, 160 96" stroke="${C.leaf}" stroke-width="6" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+function kitchenArt(){
+  return `<svg viewBox="0 0 320 220" role="img" aria-label="Illustration of the shared kitchen">
+  <rect width="320" height="220" fill="#E1ECE6"/><rect y="182" width="320" height="38" fill="#D8C2A3"/>
+  <rect x="20" y="24" width="150" height="50" fill="${C.wood2}"/><line x1="95" y1="24" x2="95" y2="74" stroke="${C.wood}" stroke-width="3"/>
+  <rect x="196" y="22" width="96" height="66" fill="#fff" stroke="#fff" stroke-width="6"/><rect x="199" y="25" width="90" height="60" fill="#CFE4EE"/>${mayonSVG(244, 85, 38, 70, false)}
+  ${Array.from({length:6},(_,i)=>Array.from({length:3},(_,j)=>`<rect x="${20+i*50}" y="${86+j*14}" width="48" height="12" fill="#F7FAF8" stroke="#D3DED8"/>`).join('')).join('')}
+  <rect x="10" y="128" width="300" height="10" fill="#5E6E66"/><rect x="18" y="138" width="284" height="46" fill="${C.wood}"/>
+  ${[0,1,2,3].map(i=>`<line x1="${18+i*71}" y1="138" x2="${18+i*71}" y2="184" stroke="${C.wood2}" stroke-width="3"/>`).join('')}
+  <rect x="40" y="104" width="38" height="26" rx="10" fill="#fff" stroke="#C9D3CE"/><rect x="52" y="100" width="14" height="6" rx="3" fill="#C9D3CE"/>
+  <path d="M110 128 L114 106 L136 106 L140 128 Z" fill="#F2B33D"/><path d="M138 112 q 10 2 6 12" stroke="#F2B33D" stroke-width="3" fill="none"/>
+  <rect x="200" y="114" width="60" height="16" rx="3" fill="#2E3B35"/><circle cx="215" cy="122" r="5" fill="#556860"/><circle cx="245" cy="122" r="5" fill="#556860"/>
+  </svg>`;
+}
+const ROOM_ART = {
+  single:{wall:'#E8EEF2', win:150, beds:[['s',150,'#5E8B70']]},
+  twin:{wall:'#E6EFE9', win:150, beds:[['s',50,'#F2B33D'],['s',254,'#F2B33D']], stand:177},
+  deluxe:{wall:'#F1EBDD', win:130, beds:[['d',100,'#2F6B4F'],['p',290,'#F2B33D']], stand:248},
+  triple:{wall:'#E8EEF2', win:150, beds:[['s',28,'#5E8B70'],['s',152,'#F2B33D'],['s',276,'#5E8B70']]},
+  family:{wall:'#E6EFE9', win:146, beds:[['d',16,'#2F6B4F'],['d',160,'#F2B33D'],['k',306,'#5E8B70']]}
+};
+function bedSVG([t,x,col]){
+  const pillow = (px,py,pw) => `<rect x="${px}" y="${py}" width="${pw}" height="16" rx="8" fill="#F7FAF8" stroke="#D3DED8"/>`;
+  if (t==='s' || t==='d') {
+    const w = t==='s' ? 96 : 130;
+    return `<rect x="${x}" y="132" width="${w}" height="74" rx="6" fill="${C.wood}"/>`
+      + `<rect x="${x-6}" y="180" width="${w+12}" height="30" rx="6" fill="#fff"/>`
+      + (t==='s' ? pillow(x+20,170,w-40) : pillow(x+10,170,52)+pillow(x+w-62,170,52))
+      + `<rect x="${x-6}" y="194" width="${w+12}" height="24" rx="5" fill="${col}"/>`
+      + `<rect x="${x-2}" y="218" width="6" height="14" fill="${C.wood}"/><rect x="${x+w-4}" y="218" width="6" height="14" fill="${C.wood}"/>`;
+  }
+  if (t==='p') return `<rect x="${x}" y="204" width="84" height="24" rx="5" fill="#fff"/>${pillow(x+8,196,34)}<rect x="${x}" y="212" width="84" height="16" rx="4" fill="${col}"/><rect x="${x+4}" y="228" width="76" height="6" fill="${C.wood}"/>`;
+  if (t==='k') return `<rect x="${x}" y="64" width="6" height="170" fill="${C.wood}"/><rect x="${x+78}" y="64" width="6" height="170" fill="${C.wood}"/>`
+    + `<rect x="${x}" y="110" width="84" height="18" rx="4" fill="#fff"/>${pillow(x+8,100,30)}<rect x="${x}" y="118" width="84" height="12" rx="3" fill="${col}"/><rect x="${x}" y="128" width="84" height="6" fill="${C.wood}"/><rect x="${x}" y="88" width="84" height="5" fill="${C.wood}"/>`
+    + `<rect x="${x}" y="196" width="84" height="20" rx="4" fill="#fff"/>${pillow(x+8,186,30)}<rect x="${x}" y="204" width="84" height="14" rx="3" fill="#F2B33D"/><rect x="${x}" y="216" width="84" height="6" fill="${C.wood}"/>`;
+  return '';
+}
+function roomArt(r){
+  const c = ROOM_ART[r.id] || ROOM_ART.twin;
+  let s = `<svg viewBox="0 0 400 250" role="img" aria-label="Illustration of the ${esc(r.name)}: ${esc(r.beds)}">`;
+  s += `<rect width="400" height="200" fill="${c.wall}"/><rect y="200" width="400" height="50" fill="#D8C2A3"/>`;
+  s += [0,1,2].map(i=>`<line x1="0" y1="${212+i*13}" x2="400" y2="${212+i*13}" stroke="#C4A985" stroke-width="1.5"/>`).join('');
+  const wx = c.win;
+  s += `<rect x="${wx-14}" y="22" width="18" height="96" fill="#F2B33D" opacity=".55"/><rect x="${wx+96}" y="22" width="18" height="96" fill="#F2B33D" opacity=".55"/>`;
+  s += `<rect x="${wx}" y="28" width="100" height="78" fill="#CFE4EE"/>${mayonSVG(wx+50, 106, 52, 92, true)}<rect x="${wx}" y="28" width="100" height="78" fill="none" stroke="#fff" stroke-width="6"/><line x1="${wx+50}" y1="28" x2="${wx+50}" y2="106" stroke="#fff" stroke-width="4"/>`;
+  if (c.stand) s += `<rect x="${c.stand}" y="176" width="46" height="44" fill="${C.wood2}"/><rect x="${c.stand+18}" y="152" width="4" height="24" fill="#5E6E66"/><path d="M${c.stand+8} 156 L${c.stand+14} 138 L${c.stand+26} 138 L${c.stand+32} 156 Z" fill="#F7D27A"/>`;
+  c.beds.forEach(bd => s += bedSVG(bd));
+  return s + '</svg>';
+}
+
+/* ---------- guest home ---------- */
+function renderHome(){
+  if (!$('hero-art').firstChild) {
+    $('hero-art').innerHTML = heroArt();
+    $('art-deck').innerHTML = deckArt();
+    $('art-lobby').innerHTML = lobbyArt();
+    $('art-kitchen').innerHTML = kitchenArt();
+  }
+  const cheapest = Math.min(...S.rooms.map(r => r.base));
+  $('facts-row').innerHTML = `<span><b>${S.rooms.length} room types</b>, sleeping 1 to ${Math.max(...S.rooms.map(r=>r.sleeps))}</span><span><b>From ${peso(cheapest)}</b> a night</span><span><b>Check-in</b> 2 PM, <b>check-out</b> 11 AM</span><span><b>Pay with</b> GCash or card</span>`;
+  $('home-rooms').innerHTML = S.rooms.map(r => `<article class="rcard">
+    ${roomArt(r)}
+    <div class="b">
+      <h3>${esc(r.name)}</h3>
+      <div class="meta">${esc(r.beds)}, sleeps ${r.sleeps}, ${esc(r.size)}</div>
+      <p class="d">${esc(r.desc)}</p>
+      <ul>${r.perks.map(p => `<li>${esc(p)}</li>`).join('')}</ul>
+      <div class="foot">
+        <div class="price"><b>${peso(r.base)}</b>per night, ${peso(r.base + r.weekend)} on Fri and Sat</div>
+        <a class="btn" href="#book" data-room="${r.id}">Book this room</a>
+      </div>
+    </div>
+  </article>`).join('');
+  $('pol-down').textContent = `Pay ${S.settings.down}% when you book to hold your room, by GCash or card. Pay the rest when you arrive.`;
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[data-room]');
+  if (a) { G.roomId = a.dataset.room; G.ci = G.co = null; G.done = null; mark('room'); }
+  if (e.target.closest('#see-rooms')) { e.preventDefault(); $('rooms-sec').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
+});
+
+/* ---------- guest ---------- */
+const G = {roomId:'family', month:thisMonth(), ci:null, co:null, method:'gcash', proof:null, done:null, errors:{}, form:{name:'',phone:'',guests:2}};
+
+function renderRooms(){
+  const fs = $('rooms');
+  fs.querySelectorAll('.room').forEach(n => n.remove());
+  S.rooms.forEach(r => {
+    const l = document.createElement('label');
+    l.className = 'room';
+    l.innerHTML = `<input type="radio" name="room" value="${r.id}" ${r.id===G.roomId?'checked':''}>
+      <div><div class="name">${esc(r.name)} <span class="desc">sleeps ${r.sleeps}</span></div><div class="desc">${esc(r.desc)}</div></div>
+      <div class="from"><b>${peso(r.base)}</b>per night</div>`;
+    l.querySelector('input').addEventListener('change', () => {
+      G.roomId = r.id; mark('room');
+      if (G.ci && (taken(r.id, G.ci) || (G.co && !rangeFree(r.id, G.ci, G.co)))) { G.ci = G.co = null; toast('Those dates are taken for this room. Pick new dates.'); }
+      G.form.guests = Math.min(G.form.guests, r.sleeps);
+      renderGuestCal(); renderSummary();
+    });
+    fs.appendChild(l);
+  });
+}
+
+function renderGuestCal(){
+  const r = room(G.roomId);
+  $('cal-title').textContent = monthTitle(G.month);
+  $('g-prev').disabled = G.month <= thisMonth();
+  $('g-hint').textContent = !G.ci || G.co ? 'Tap your check-in date. Friday and Saturday nights cost more.' : 'Now tap your check-out date.';
+  const cal = $('g-cal');
+  cal.innerHTML = DOW.map(d => `<div class="dow">${d}</div>`).join('');
+  monthCells(G.month.getFullYear(), G.month.getMonth()).forEach(k => {
+    if (!k) { cal.insertAdjacentHTML('beforeend','<div></div>'); return; }
+    const past = k < TODAY, tk = !past && taken(G.roomId, k);
+    const b = document.createElement('button');
+    b.type = 'button';
+    const cls = ['day'];
+    if (past) cls.push('past');
+    if (tk) cls.push('taken');
+    if (k === TODAY) cls.push('today');
+    if (isWeekendNight(k)) cls.push('wkend');
+    if (G.ci === k) cls.push('start');
+    if (G.co === k) cls.push('end');
+    if (G.ci && G.co && k > G.ci && k < G.co) cls.push('range');
+    b.className = cls.join(' ');
+    const d = parse(k).getDate();
+    b.innerHTML = `<span class="n">${d}</span><span class="p">${tk ? 'Booked' : short(nightPrice(r,k))}</span>`;
+    b.setAttribute('aria-label', `${fmt(k)}${past?', past':tk?', booked':', '+peso(nightPrice(r,k))+' per night'}`);
+    if (past) b.disabled = true;
+    b.addEventListener('click', () => pickDate(k));
+    cal.appendChild(b);
+  });
+}
+
+function pickDate(k){
+  if (k < TODAY) return;
+  G.done = null;
+  const tk = taken(G.roomId, k);
+  if (!G.ci || G.co) {
+    if (tk) return toast('That night is already booked. Pick another date.');
+    G.ci = k; G.co = null;
+  } else if (k <= G.ci) {
+    if (!tk) G.ci = k;
+  } else if (rangeFree(G.roomId, G.ci, k)) {
+    G.co = k; mark('dates');
+  } else {
+    toast('Some nights in that range are already booked.');
+    if (!tk) { G.ci = k; G.co = null; }
+  }
+  renderGuestCal(); renderSummary();
+}
+
+function renderSummary(){
+  const el = $('summary');
+  if (G.done) {
+    const b = G.done, r = room(b.roomId), pend = b.status === 'pending';
+    el.innerHTML = `<div class="done">
+      <h2>${pend ? 'Booking request sent' : 'Booking confirmed'}</h2>
+      <p style="margin:0;color:var(--muted)">${pend ? 'The owner will check your GCash payment and text you at '+esc(b.phone)+' once it is approved, usually within a few hours.' : 'Your down payment went through. We sent the details to '+esc(b.phone)+'.'}</p>
+      <div class="ref">${b.ref}</div>
+      <ul class="lines">
+        <li><span>Room</span><span>${esc(r.name)}</span></li>
+        <li><span>Check-in</span><span>${fmt(b.checkIn)}, 2 PM</span></li>
+        <li><span>Check-out</span><span>${fmt(b.checkOut)}, 11 AM</span></li>
+        <li class="total"><span>Total</span><span>${peso(b.total)}</span></li>
+        <li class="muted"><span>Balance to pay on arrival</span><span>${peso(b.total - b.down)}</span></li>
+      </ul>
+      <button class="btn block" id="again">Make another booking</button>
+      <a class="btn ghost block" href="#admin" style="margin-top:8px">See it in the owner admin</a>
+    </div>`;
+    $('again').onclick = () => { G.done = null; G.ci = G.co = null; G.proof = null; renderGuestCal(); renderSummary(); };
+    return;
+  }
+  const r = room(G.roomId);
+  if (!G.ci) {
+    el.innerHTML = `<h2>Your stay</h2><p class="empty">Pick your check-in and check-out dates on the calendar to see the total.</p>
+      <ul class="lines" style="margin-top:16px"><li class="muted"><span>${esc(r.name)}, weeknights</span><span>${peso(r.base)}</span></li><li class="muted"><span>Friday and Saturday nights</span><span>${peso(r.base + r.weekend)}</span></li><li class="muted"><span>Cleaning fee, once per stay</span><span>${peso(S.settings.cleaning)}</span></li></ul>`;
+    return;
+  }
+  if (!G.co) {
+    el.innerHTML = `<h2>Your stay</h2><div class="dates"><div><small>Check-in</small><b>${fmt(G.ci)}</b></div><div><small>Check-out</small><b style="color:var(--muted)">Pick a date</b></div></div><p class="empty">Now tap your check-out date on the calendar.</p>`;
+    return;
+  }
+  const q = quote(S, G.roomId, G.ci, G.co), n = q.wk + q.we, E = G.errors;
+  el.innerHTML = `<h2>Your stay</h2>
+    <div class="dates"><div><small>Check-in</small><b>${fmt(G.ci)}</b></div><div><small>Check-out</small><b>${fmt(G.co)}</b></div></div>
+    <ul class="lines">
+      ${q.wk ? `<li><span>${q.wk} weeknight${q.wk>1?'s':''} × ${peso(r.base)}</span><span>${peso(q.wk*r.base)}</span></li>`:''}
+      ${q.we ? `<li><span>${q.we} weekend night${q.we>1?'s':''} × ${peso(r.base+r.weekend)}</span><span>${peso(q.we*(r.base+r.weekend))}</span></li>`:''}
+      <li><span>Cleaning fee</span><span>${peso(S.settings.cleaning)}</span></li>
+      <li class="total"><span>Total for ${n} night${n>1?'s':''}</span><span>${peso(q.total)}</span></li>
+      <li class="due"><span>Down payment due now (${S.settings.down}%)</span><span>${peso(q.down)}</span></li>
+      <li class="muted"><span>Pay on arrival</span><span>${peso(q.total-q.down)}</span></li>
+    </ul>
+    <form id="bform" novalidate>
+      <label class="f" for="f-name">Full name</label>
+      <input class="in" id="f-name" autocomplete="name" value="${esc(G.form.name)}">
+      ${E.name?`<p class="err">${E.name}</p>`:''}
+      <div class="row2">
+        <div><label class="f" for="f-phone">Mobile number</label><input class="in" id="f-phone" inputmode="tel" placeholder="0917 123 4567" value="${esc(G.form.phone)}">${E.phone?`<p class="err">${E.phone}</p>`:''}</div>
+        <div><label class="f" for="f-guests">Guests</label><select class="in" id="f-guests">${Array.from({length:r.sleeps},(_,i)=>`<option ${i+1===+G.form.guests?'selected':''}>${i+1}</option>`).join('')}</select></div>
+      </div>
+      <label class="f">Pay the down payment with</label>
+      <div class="pay">
+        <label><input type="radio" name="pm" value="gcash" ${G.method==='gcash'?'checked':''}>GCash</label>
+        <label><input type="radio" name="pm" value="card" ${G.method==='card'?'checked':''}>Card</label>
+      </div>
+      ${G.method==='gcash' ? `<div class="gcash-box">Send <b>${peso(q.down)}</b> to GCash <b>${esc(S.settings.gcash)}</b> (Lantaw Inn), then upload the screenshot.
+        <label class="f" for="f-proof">Payment screenshot</label><input type="file" id="f-proof" accept="image/*">
+        ${G.proof?'<p class="fine" style="margin-top:6px">Screenshot attached.</p>':''}
+        ${E.proof?`<p class="err">${E.proof}</p>`:''}</div>`
+      : `<p class="fine">In the real system this opens the PayMongo card checkout. In this demo the payment goes through right away.</p>`}
+      <button class="btn block" type="submit">${G.method==='gcash' ? 'Send booking request' : 'Pay '+peso(q.down)+' and book'}</button>
+      <p class="fine">Free cancellation up to 3 days before check-in. After that the down payment is not refunded.</p>
+    </form>`;
+  const keep = () => { G.form.name = $('f-name').value; G.form.phone = $('f-phone').value; G.form.guests = $('f-guests').value; };
+  el.querySelectorAll('input[name=pm]').forEach(i => i.addEventListener('change', () => { keep(); G.method = i.value; G.errors = {}; renderSummary(); }));
+  const pf = $('f-proof');
+  if (pf) pf.addEventListener('change', () => {
+    const f = pf.files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => { keep(); G.proof = rd.result; delete G.errors.proof; renderSummary(); };
+    rd.readAsDataURL(f);
+  });
+  $('bform').addEventListener('submit', e => {
+    e.preventDefault(); keep();
+    const E = {};
+    if (G.form.name.trim().length < 2) E.name = 'Enter your full name.';
+    if (G.form.phone.replace(/\D/g,'').length < 10) E.phone = 'Enter an 11-digit mobile number.';
+    if (G.method === 'gcash' && !G.proof) E.proof = 'Upload your GCash screenshot so the owner can check it.';
+    G.errors = E;
+    if (Object.keys(E).length) return renderSummary();
+    if (!rangeFree(G.roomId, G.ci, G.co)) { toast('Someone just booked those dates. Pick new dates.'); G.ci = G.co = null; return renderAll(); }
+    const b = {ref:'LTW-'+(S.seq++), roomId:G.roomId, guest:G.form.name.trim(), phone:G.form.phone.trim(), guests:+G.form.guests, checkIn:G.ci, checkOut:G.co, total:q.total, down:q.down,
+      paid: G.method==='card' ? q.down : 0, status: G.method==='card' ? 'confirmed' : 'pending', method: G.method==='card'?'Card':'GCash', proof: G.proof, created: TODAY, isNew:true};
+    S.bookings.push(b); save(); mark('book');
+    G.done = b; G.ci = G.co = null; G.proof = null; G.form = {name:'',phone:'',guests:2};
+    renderAll();
+    window.scrollTo({top: $('summary').offsetTop - 80, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+  });
+}
+
+$('g-prev').onclick = () => { G.month = new Date(G.month.getFullYear(), G.month.getMonth()-1, 1); renderGuestCal(); };
+$('g-next').onclick = () => { G.month = new Date(G.month.getFullYear(), G.month.getMonth()+1, 1); renderGuestCal(); };
+
+/* ---------- admin ---------- */
+const A = {tab:'bookings', filter:'all', calRoom:'family', calMonth:thisMonth()};
+
+function monthStats(){
+  const m = TODAY.slice(0,7);
+  const daysIn = new Date(+m.slice(0,4), +m.slice(5,7), 0).getDate();
+  const perRoom = {};
+  S.rooms.forEach(r => perRoom[r.id] = 0);
+  for (let d=1; d<=daysIn; d++) {
+    const k = `${m}-${pad(d)}`;
+    S.rooms.forEach(r => { const b = bookingOn(r.id,k); if (b && b.status !== 'pending') perRoom[r.id]++; });
+  }
+  const booked = Object.values(perRoom).reduce((a,b)=>a+b,0);
+  const received = S.bookings.filter(b => active(b) && b.checkIn.slice(0,7) === m).reduce((a,b)=>a+b.paid,0);
+  return {daysIn, perRoom, occ: Math.round(booked / (daysIn*S.rooms.length) * 100), received};
+}
+
+function renderAdmin(){
+  const pend = S.bookings.filter(b => b.status === 'pending');
+  $('alert').innerHTML = pend.length ? `<div class="alert"><span>${pend.length} booking${pend.length>1?'s are':' is'} waiting for you to check the GCash payment.</span><button class="btn sm" id="see-pend">Review now</button></div>` : '';
+  if (pend.length) $('see-pend').onclick = () => { A.tab='bookings'; A.filter='pending'; renderAdmin(); };
+  const ms = monthStats();
+  const wk = addDays(TODAY,7);
+  const arrivals = S.bookings.filter(b => statusOf(b)==='confirmed' && b.checkIn >= TODAY && b.checkIn < wk).length;
+  const staying = S.bookings.filter(b => statusOf(b)==='staying').length;
+  $('stats').innerHTML = `
+    <div class="stat"><small>Received this month</small><b>${peso(ms.received)}</b><span>Down payments and full payments</span></div>
+    <div class="stat"><small>Occupancy this month</small><b>${ms.occ}%</b><span>Of all room nights</span></div>
+    <div class="stat"><small>Arriving in 7 days</small><b>${arrivals}</b><span>${staying} room${staying===1?'':'s'} occupied now</span></div>
+    <div class="stat"><small>Waiting for approval</small><b>${pend.length}</b><span>GCash payments to check</span></div>`;
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === A.tab));
+  ['bookings','calendar','rates','reports'].forEach(t => $('tab-'+t).hidden = t !== A.tab);
+  $('filter').value = A.filter;
+  if (A.tab === 'bookings') renderTable();
+  if (A.tab === 'calendar') renderAdminCal();
+  if (A.tab === 'rates') renderRates();
+  if (A.tab === 'reports') { renderReports(); mark('reports'); }
+}
+
+function renderTable(){
+  let list = S.bookings.slice();
+  const f = A.filter;
+  list = list.filter(b => { const s = statusOf(b);
+    if (f==='all') return true; if (f==='pending') return s==='pending'; if (f==='upcoming') return s==='confirmed' || s==='staying';
+    return s === f; });
+  const rank = s => ({pending:0, staying:1, confirmed:2, completed:3, cancelled:4})[s];
+  list.sort((a,b) => rank(statusOf(a)) - rank(statusOf(b)) || (rank(statusOf(a))>=3 ? b.checkIn.localeCompare(a.checkIn) : a.checkIn.localeCompare(b.checkIn)));
+  const tb = $('tbody');
+  if (!list.length) { tb.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">No bookings here yet.</td></tr>`; return; }
+  tb.innerHTML = list.map(b => {
+    const s = statusOf(b), r = room(b.roomId), n = nights(b.checkIn,b.checkOut);
+    let acts = '';
+    if (b.proof) acts += `<button class="btn ghost sm" data-act="proof" data-ref="${b.ref}">View payment</button>`;
+    if (s==='pending') acts += `<button class="btn ok sm" data-act="approve" data-ref="${b.ref}">Approve</button><button class="btn warn sm" data-act="decline" data-ref="${b.ref}">Decline</button>`;
+    if ((s==='confirmed'||s==='staying') && b.paid < b.total) acts += `<button class="btn ghost sm" data-act="paid" data-ref="${b.ref}">Mark fully paid</button>`;
+    if (s==='confirmed') acts += `<button class="btn warn sm" data-act="cancel" data-ref="${b.ref}">Cancel</button>`;
+    return `<tr>
+      <td><b>${b.ref}</b>${b.isNew?' <span class="chip pending">New</span>':''}<span class="sub">${b.method}</span></td>
+      <td>${esc(b.guest)}<span class="sub">${esc(b.phone)}, ${b.guests} guest${b.guests>1?'s':''}</span></td>
+      <td>${esc(r.name)}</td>
+      <td class="num">${fmtShort(b.checkIn)} to ${fmtShort(b.checkOut)}<span class="sub">${n} night${n>1?'s':''}</span></td>
+      <td class="num">${peso(b.total)}</td>
+      <td class="num">${peso(b.paid)}<span class="sub">${s==='cancelled'?'':b.paid>=b.total?'Fully paid':peso(b.total-b.paid)+' balance'}</span></td>
+      <td><span class="chip ${s}">${STATUS_LABEL[s]}</span></td>
+      <td><div class="acts">${acts || '<span style="color:var(--muted)">None</span>'}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+$('tbody').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-act]'); if (!btn) return;
+  const b = S.bookings.find(x => x.ref === btn.dataset.ref); const act = btn.dataset.act;
+  if (act === 'proof') return dialog(`<h3>Payment for ${b.ref}</h3><p class="fine" style="margin:0 0 12px">${esc(b.guest)} should have sent ${peso(b.down)} by ${b.method}.</p><img src="${b.proof}" alt="Payment screenshot uploaded by the guest"><div class="actions">${b.status==='pending'?`<button class="btn ok" id="dlg-ok">Approve booking</button>`:''}<button class="btn ghost" data-close>Close</button></div>`,
+    () => { const ok = $('dlg-ok'); if (ok) ok.onclick = () => { approve(b); $('dlg').close(); }; });
+  if (act === 'approve') return approve(b);
+  if (act === 'paid') { b.paid = b.total; save(); renderAll(); return toast(`${b.ref} marked as fully paid.`); }
+  if (act === 'decline' || act === 'cancel') {
+    const verb = act === 'decline' ? 'Decline' : 'Cancel';
+    return dialog(`<h3>${verb} ${b.ref}?</h3><p style="margin:0">${esc(b.guest)}'s dates (${fmtShort(b.checkIn)} to ${fmtShort(b.checkOut)}) open up again for other guests. Text the guest to let them know.</p><div class="actions"><button class="btn ghost" data-close>Keep booking</button><button class="btn warn" id="dlg-ok">${verb} booking</button></div>`,
+      () => { $('dlg-ok').onclick = () => { b.status = 'cancelled'; b.isNew = false; save(); $('dlg').close(); renderAll(); toast(`${b.ref} ${act==='decline'?'declined':'cancelled'}. The dates are open again.`); }; });
+  }
+});
+function approve(b){ mark('approve'); b.status = 'confirmed'; b.paid = b.down; b.isNew = false; save(); renderAll(); toast(`${b.ref} approved. The guest gets a confirmation text.`); }
+
+$('filter').onchange = e => { A.filter = e.target.value; renderTable(); };
+$('tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) { A.tab = b.dataset.tab; renderAdmin(); } });
+
+function renderAdminCal(){
+  const sel = $('a-room');
+  sel.innerHTML = S.rooms.map(r => `<option value="${r.id}" ${r.id===A.calRoom?'selected':''}>${esc(r.name)}</option>`).join('');
+  $('a-month').textContent = monthTitle(A.calMonth);
+  const cal = $('a-cal');
+  cal.innerHTML = DOW.map(d => `<div class="dow">${d}</div>`).join('');
+  monthCells(A.calMonth.getFullYear(), A.calMonth.getMonth()).forEach(k => {
+    if (!k) { cal.insertAdjacentHTML('beforeend','<div></div>'); return; }
+    const b = bookingOn(A.calRoom, k), blk = isBlocked(A.calRoom, k), past = k < TODAY;
+    const el = document.createElement('button'); el.type='button';
+    const cls = ['day'];
+    if (past && !b) cls.push('past');
+    if (b) cls.push(b.status==='pending' ? 'pend' : 'bk');
+    else if (blk) cls.push('blk');
+    if (k === TODAY) cls.push('today');
+    el.className = cls.join(' ');
+    const label = b ? esc(b.guest.split(' ')[0]) + (b.checkIn===k?' in':'') : blk ? 'Blocked' : past ? '' : short(nightPrice(room(A.calRoom),k));
+    el.innerHTML = `<span class="n">${parse(k).getDate()}</span><span class="p">${label}</span>`;
+    el.setAttribute('aria-label', `${fmt(k)}: ${b ? 'booked by '+b.guest : blk ? 'blocked' : 'open'}`);
+    if (past && !b) el.disabled = true;
+    el.onclick = () => {
+      if (b) { A.tab='bookings'; A.filter='all'; renderAdmin(); return toast(`${fmt(k)} is booked by ${b.guest} (${b.ref}).`); }
+      const list = S.blocked[A.calRoom] = S.blocked[A.calRoom] || [];
+      if (blk) list.splice(list.indexOf(k),1); else { list.push(k); mark('block'); }
+      save(); renderAdminCal(); renderGuestCal();
+      toast(blk ? `${fmt(k)} is open for booking again.` : `${fmt(k)} blocked. Guests can't book it.`);
+    };
+    cal.appendChild(el);
+  });
+}
+$('a-room').onchange = e => { A.calRoom = e.target.value; renderAdminCal(); };
+$('a-prev').onclick = () => { A.calMonth = new Date(A.calMonth.getFullYear(), A.calMonth.getMonth()-1, 1); renderAdminCal(); };
+$('a-next').onclick = () => { A.calMonth = new Date(A.calMonth.getFullYear(), A.calMonth.getMonth()+1, 1); renderAdminCal(); };
+$('sync').onclick = () => {
+  const v = $('ical').value.trim();
+  if (!/^https?:\/\/.+/.test(v)) return toast('Paste the full calendar link, starting with https://');
+  toast('Calendar connected. In the real system it syncs every 30 minutes.');
+};
+
+function renderRates(){
+  $('rate-rows').innerHTML = S.rooms.map(r => `<div class="rate-row">
+    <div><b>${esc(r.name)}</b><div class="fine" style="margin:0">Sleeps ${r.sleeps}</div></div>
+    <div><label class="f" for="rb-${r.id}">Per night (₱)</label><input class="in" type="number" min="0" id="rb-${r.id}" value="${r.base}"></div>
+    <div><label class="f" for="rw-${r.id}">Weekend extra (₱)</label><input class="in" type="number" min="0" id="rw-${r.id}" value="${r.weekend}"></div>
+  </div>`).join('');
+  $('s-clean').value = S.settings.cleaning; $('s-down').value = S.settings.down; $('s-gcash').value = S.settings.gcash;
+}
+$('save-rates').onclick = () => {
+  const num = id => Number($(id).value);
+  for (const r of S.rooms) { if (!(num('rb-'+r.id) > 0) || num('rw-'+r.id) < 0) return toast(`Enter a nightly rate above zero for the ${r.name}.`); }
+  const dp = num('s-down'); if (!(dp >= 0 && dp <= 100)) return toast('Down payment must be between 0 and 100%.');
+  S.rooms.forEach(r => { r.base = num('rb-'+r.id); r.weekend = num('rw-'+r.id); });
+  S.settings.cleaning = Math.max(0, num('s-clean')); S.settings.down = dp; S.settings.gcash = $('s-gcash').value.trim() || S.settings.gcash;
+  save(); mark('rates'); renderAll(); toast('Rates saved. Guests see the new prices now.');
+};
+
+function renderReports(){
+  const t = parse(TODAY), months = [];
+  for (let i=5;i>=0;i--) { const d = new Date(t.getFullYear(), t.getMonth()-i, 1); months.push({k:key(d).slice(0,7), label:d.toLocaleDateString('en-PH',{month:'short'})}); }
+  months.forEach(m => m.v = S.bookings.filter(b => active(b) && b.checkIn.slice(0,7)===m.k).reduce((a,b)=>a+b.paid,0));
+  const max = Math.max(...months.map(m=>m.v), 1);
+  $('bars').innerHTML = months.map((m,i) => `<div class="bar ${i===5?'cur':''}"><b>${m.v?short(m.v):'0'}</b><i style="height:${Math.max(2, m.v/max*150)}px"></i><span>${m.label}</span></div>`).join('');
+  const ms = monthStats();
+  $('occ').innerHTML = S.rooms.map(r => { const p = Math.round(ms.perRoom[r.id]/ms.daysIn*100); return `<li><span>${esc(r.name)}</span><div class="track"><i style="width:${p}%"></i></div><b style="text-align:right">${p}%</b></li>`; }).join('');
+  $('occ-note').textContent = `Counts confirmed nights only. This month has ${ms.daysIn} nights per room. The current month shows down payments so far; balances come in at check-in.`;
+}
+
+$('reset').onclick = () => dialog(`<h3>Reset demo data?</h3><p style="margin:0">This removes the bookings you made in the demo and puts back the sample data.</p><div class="actions"><button class="btn ghost" data-close>Keep my changes</button><button class="btn" id="dlg-ok">Reset demo</button></div>`,
+  () => { $('dlg-ok').onclick = () => { S = freshState(); save(); G.done=null; G.ci=G.co=null; $('dlg').close(); renderAll(); toast('Demo data reset.'); }; });
+
+/* ---------- demo guide ---------- */
+const STEPS = [
+  {id:'room', t:'Pick a room', d:'On the guest page, look through the rooms and click Book this room. The booking page opens with that room picked.', go:'home'},
+  {id:'dates', t:'Choose check-in and check-out', d:'Booked dates are striped and can\'t be picked, so double bookings can\'t happen. Friday and Saturday nights cost more.', go:'book'},
+  {id:'book', t:'Book with GCash or card', d:'GCash asks for a payment screenshot and waits for the owner. Card confirms right away.', go:'book'},
+  {id:'approve', t:'Approve a GCash booking', d:'In the owner admin, click View payment on a booking waiting for approval, then Approve.', go:'bookings'},
+  {id:'block', t:'Block a date', d:'In the Calendar tab, click an open date to close it, for repairs or a walk-in guest.', go:'calendar'},
+  {id:'rates', t:'Change a room rate', d:'In Rooms & rates, edit a price and save. The guest site shows the new price right away.', go:'rates'},
+  {id:'reports', t:'Check the reports', d:'Money received over the last 6 months and occupancy for each room.', go:'reports'}
+];
+let done = {};
+try { done = JSON.parse(localStorage.getItem('lantaw-guide')) || {}; } catch(e) {}
+let guideOpen = innerWidth >= 1880;
+try { const v = localStorage.getItem('lantaw-guide-open'); if (v !== null) guideOpen = v !== 'false'; } catch(e) {}
+function mark(id){ if (done[id]) return; done[id] = true; try { localStorage.setItem('lantaw-guide', JSON.stringify(done)); } catch(e) {} renderGuide();
+  const g = $('guide'); g.classList.remove('pulse'); void g.offsetWidth; g.classList.add('pulse'); }
+function renderGuide(){
+  const n = STEPS.filter(s => done[s.id]).length;
+  $('guide-count').textContent = `${n} of ${STEPS.length} done`;
+  $('guide-bar').style.width = (n/STEPS.length*100) + '%';
+  const next = STEPS.find(s => !done[s.id]);
+  $('guide-list').innerHTML = STEPS.map(s => `<li class="${done[s.id]?'ok':''}"><div><b>${s.t}</b><p>${s.d}</p>${s===next ? `<button class="btn ghost sm" data-go="${s.go}">Show me</button>`:''}</div></li>`).join('');
+  $('guide').dataset.open = guideOpen; $('guide-toggle').setAttribute('aria-expanded', guideOpen); $('guide-body').hidden = !guideOpen;
+}
+$('guide-toggle').onclick = () => { guideOpen = !guideOpen; try { localStorage.setItem('lantaw-guide-open', guideOpen); } catch(e) {} renderGuide(); };
+$('guide-reset').onclick = () => { done = {}; try { localStorage.removeItem('lantaw-guide'); } catch(e) {} renderGuide(); };
+$('guide-list').addEventListener('click', e => {
+  const b = e.target.closest('[data-go]'); if (!b) return;
+  const go = b.dataset.go;
+  if (go === 'home') { if (location.hash === '#guest' || !location.hash) { $('rooms-sec').scrollIntoView({behavior:'smooth'}); } else { location.hash = '#guest'; setTimeout(() => $('rooms-sec').scrollIntoView(), 50); } return; }
+  if (go === 'book') { location.hash = '#book'; return; }
+  A.tab = go; if (go === 'bookings') A.filter = 'pending';
+  if (location.hash !== '#admin') location.hash = '#admin'; else renderAdmin();
+});
+
+/* ---------- routing ---------- */
+function route(){
+  const admin = location.hash === '#admin', book = location.hash === '#book';
+  $('view-guest').hidden = admin || book; $('view-book').hidden = !book; $('view-admin').hidden = !admin;
+  if (book) { renderRooms(); renderGuestCal(); renderSummary(); }
+  $('nav-guest').toggleAttribute('aria-current', !admin); $('nav-admin').toggleAttribute('aria-current', admin);
+  if (admin) { $('nav-admin').setAttribute('aria-current','page'); renderAdmin(); } else { $('nav-guest').setAttribute('aria-current','page'); }
+  window.scrollTo(0,0);
+  renderGuide();
+}
+function renderAll(){ renderHome(); renderRooms(); renderGuestCal(); renderSummary(); if (location.hash === '#admin') renderAdmin(); }
+window.addEventListener('hashchange', route);
+renderHome(); renderRooms(); renderGuestCal(); renderSummary(); route();
+})();
+</script>
+</body>
+</html>

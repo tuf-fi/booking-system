@@ -1,0 +1,146 @@
+{
+  "mayon-sunrise": {
+    "alt": "Mayon Volcano rising above a field of red flowers under a blue sky",
+    "credit": "Chriz Luminario",
+    "source": "https://www.pexels.com/photo/7467112/",
+    "width": 2000,
+    "height": 1333,
+    "isStock": true,
+    "card": {
+      "width": 640,
+      "height": 426
+    },
+    "full": {
+      "width": 1600,
+      "height": 1066
+    }
+  },
+  "mayon-dusk": {
+    "alt": "Mayon Volcano at dusk above the bay, with the lights of the Legazpi shoreline in front",
+    "credit": "Archie Binamira",
+    "source": "https://www.pexels.com/photo/990871/",
+    "width": 2000,
+    "height": 1333,
+    "isStock": true,
+    "card": {
+      "width": 640,
+      "height": 426
+    },
+    "full": {
+      "width": 1600,
+      "height": 1066
+    }
+  },
+  "room-single": {
+    "alt": "Bright single room with a made single bed, desk and white curtains",
+    "credit": "Mateusz Pielech",
+    "source": "https://www.pexels.com/photo/39338470/",
+    "width": 2000,
+    "height": 1336,
+    "isStock": true,
+    "card": {
+      "width": 640,
+      "height": 428
+    },
+    "full": {
+      "width": 1600,
+      "height": 1069
+    }
+  },
+  "room-twin": {
+    "alt": "Twin room with two single beds, white linen and a bedside lamp between them",
+    "credit": "Alan Antony",
+    "source": "https://www.pexels.com/photo/18470959/",
+    "width": 2000,
+    "height": 1333,
+    "isStock": true,
+    "card": {
+      "width": 640,
+      "height": 426
+    },
+    "full": {
+      "width": 1600,
+      "height": 1066
+    }
+  },
+  "room-deluxe": {
+    "alt": "Double bed with brown linen, a carved wooden headboard and warm bedside lamps",
+    "credit": "Chris F",
+    "source": "https://www.pexels.com/photo/21629415/",
+    "width": 2000,
+    "height": 1284,
+    "isStock": true,
+    "card": {
+      "width": 640,
+      "height": 411
+    },
+    "full": {
+      "width": 1600,
+      "height": 1027
+    }
+  },
+  "room-triple": {
+    "alt": "Wood-panelled room with beds made up in white sheets",
+    "credit": "AHMED AQEELY",
+    "source": "https://www.pexels.com/photo/14465274/",
+    "width": 2000,
+    "height": 3000,
+    "isStock": true,
+    "card": {
+      "width": 640,
+      "height": 960
+    },
+    "full": {
+      "width": 1600,
+      "height": 2400
+    }
+  },
+  "room-family": {
+    "alt": "Family room with a wooden bunk bed, a window and a striped rug",
+    "credit": "Curtis Adams",
+    "source": "https://www.pexels.com/photo/4221409/",
+    "width": 2000,
+    "height": 1333,
+    "isStock": true,
+    "card": {
+      "width": 640,
+      "height": 426
+    },
+    "full": {
+      "width": 1600,
+      "height": 1066
+    }
+  },
+  "roof-deck": {
+    "alt": "Terrace with wicker chairs, tropical plants and a view through the glass doors",
+    "credit": "Skylar Kang",
+    "source": "https://www.pexels.com/photo/6430734/",
+    "width": 2000,
+    "height": 1325,
+    "isStock": true,
+    "card": {
+      "width": 640,
+      "height": 424
+    },
+    "full": {
+      "width": 1600,
+      "height": 1060
+    }
+  },
+  "kitchen": {
+    "alt": "Bright open kitchen with white cabinets, a breakfast bar and bar stools",
+    "credit": "Max Vakhtbovych",
+    "source": "https://www.pexels.com/photo/5998041/",
+    "width": 2000,
+    "height": 2647,
+    "isStock": true,
+    "card": {
+      "width": 640,
+      "height": 847
+    },
+    "full": {
+      "width": 1600,
+      "height": 2118
+    }
+  }
+}
