@@ -41,7 +41,7 @@ export function Manage() {
       await guestCancel(booking.reference)
       toast('Your booking was cancelled.')
     } catch (failure) {
-      toast(failure instanceof BookingError ? failure.message : 'Could not cancel. Please text us.')
+      toast(failure instanceof BookingError ? failure.message : 'Could not cancel. Please text us.', 'error')
     } finally {
       setBusy(false)
       setConfirming(false)
@@ -52,24 +52,23 @@ export function Manage() {
 
   return (
     <div className="container-page max-w-3xl pb-10 pt-12">
-      <p className="eyebrow">Manage my booking</p>
-      <h1 className="mt-3 text-4xl font-extrabold sm:text-5xl">Find your booking</h1>
-      <p className="mt-3 text-muted">Enter the reference number from your confirmation text and the mobile number you booked with.</p>
+      <h1 className="text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">Find your booking</h1>
+      <p className="mt-2 max-w-xl text-[0.875rem] leading-[1.65] text-muted">Enter the reference from your confirmation text and the mobile number you booked with.</p>
 
-      <form onSubmit={lookup} className="card mt-8 grid gap-4 p-5 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+      <form onSubmit={lookup} className="mt-8 grid gap-4 border border-line bg-surface p-5 shadow-soft sm:grid-cols-[1fr_1fr_auto] sm:items-end sm:p-6">
         <div>
           <label htmlFor="m-ref" className="label">Reference number</label>
-          <input id="m-ref" className="field uppercase" placeholder="LTW-XXXXX" value={reference} onChange={e => setReference(e.target.value)} required autoComplete="off" />
+          <input id="m-ref" className="field field-compact rounded-none uppercase" placeholder="LTW-XXXXX" value={reference} onChange={e => setReference(e.target.value)} required autoComplete="off" />
         </div>
         <div>
           <label htmlFor="m-mobile" className="label">Mobile number</label>
-          <input id="m-mobile" className="field" inputMode="tel" placeholder="0917 123 4567" value={mobile} onChange={e => setMobile(e.target.value)} required />
+          <input id="m-mobile" className="field field-compact rounded-none" inputMode="tel" placeholder="0917 123 4567" value={mobile} onChange={e => setMobile(e.target.value)} required />
         </div>
-        <button type="submit" className="btn btn-dark h-[2.9rem]" disabled={busy}><Search size={17} />{busy && !booking ? 'Looking…' : 'Find booking'}</button>
+        <button type="submit" className="btn btn-primary h-[2.6rem] min-h-0 rounded-none px-6 text-[0.875rem]" disabled={busy}><Search size={16} aria-hidden />{busy && !booking ? 'Looking…' : 'Find booking'}</button>
       </form>
 
       {notFound && (
-        <p role="alert" className="mt-4 rounded-2xl bg-danger-tint px-4 py-3 text-sm text-danger">
+        <p role="alert" className="mt-4 bg-danger-tint px-4 py-3 text-[0.875rem] text-danger">
           We could not find a booking with those details. Check both and try again, or text us at 0917 555 0142.
         </p>
       )}

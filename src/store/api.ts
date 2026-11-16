@@ -3,6 +3,8 @@ import { eachNight, nightsBetween, today, type DateKey } from '../lib/dates'
 import { isRangeFree } from '../lib/availability'
 import { peso } from '../lib/money'
 import { quoteStay } from '../lib/pricing'
+import { normalizeMobile } from '../lib/validation'
+import { getAccountById } from './accounts'
 import { commit, getDb, resetDb } from './db'
 
 export class DatesTakenError extends Error {
@@ -11,15 +13,17 @@ export class DatesTakenError extends Error {
   }
 }
 
+export { isValidMobile, normalizeMobile } from '../lib/validation'
+
 export class BookingError extends Error {}
 
 export interface CreateBookingInput {
+  userId: string
   roomId: string
   checkIn: DateKey
   checkOut: DateKey
   guestName: string
   guestMobile: string
-  guestEmail: string
   guests: number
   method: Extract<PaymentMethod, 'gcash_manual' | 'paymongo'>
   proof: string | null
@@ -29,13 +33,6 @@ const PAYMONGO_WINDOW_MS = 30 * 60 * 1000
 const REFERENCE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
 const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms))
-
-export const normalizeMobile = (value: string) => {
-  const digits = value.replace(/\D/g, '')
-  return digits.length >= 10 ? digits.slice(-10) : digits
-}
-
-export const isValidMobile = (value: string) => /^(09|\+?639)\d{9}$/.test(value.replace(/[\s-]/g, ''))
 
 const makeReference = (db: Db) => {
   for (;;) {
@@ -74,6 +71,8 @@ export const createBooking = async (input: CreateBookingInput): Promise<Booking>
   await wait(450)
   sweepExpired()
   const db = getDb()
+  const account = getAccountById(input.userId)
+  if (!account || !account.emailVerified) throw new BookingError('Sign in with a verified account to book.')
   const room = db.rooms.find(r => r.id === input.roomId && r.isActive)
   if (!room) throw new BookingError('That room is not available.')
   if (input.checkIn < today() || input.checkOut <= input.checkIn) throw new BookingError('Pick valid dates.')
@@ -89,7 +88,8 @@ export const createBooking = async (input: CreateBookingInput): Promise<Booking>
     roomId: room.id,
     guestName: input.guestName.trim(),
     guestMobile: input.guestMobile.trim(),
-    guestEmail: input.guestEmail.trim(),
+    guestEmail: account.email,
+    userId: account.id,
     guests: input.guests,
     checkIn: input.checkIn,
     checkOut: input.checkOut,

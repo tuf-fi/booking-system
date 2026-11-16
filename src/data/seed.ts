@@ -2,8 +2,9 @@ import type { Booking, BookingStatus, Db, PaymentMethod, Room, Settings } from '
 import { addDays, today } from '../lib/dates'
 import { pesosToCentavos } from '../lib/money'
 import { quoteStay } from '../lib/pricing'
+import { demoGuest } from './seedAccounts'
 
-export const DB_VERSION = 2
+export const DB_VERSION = 4
 
 const rooms: Room[] = [
   {
@@ -125,10 +126,22 @@ const seedStays: SeedStay[] = [
   [22, 'deluxe', 2, 'pending_approval', 'gcash_manual'],
   [26, 'family', 4, 'confirmed', 'gcash_manual'],
   [31, 'single', 3, 'cancelled', 'paymongo'],
-  [40, 'family', 2, 'pending_approval', 'gcash_manual']
+  [40, 'family', 2, 'pending_approval', 'gcash_manual'],
+  [50, 'single', 2, 'confirmed', 'paymongo'],
+  [55, 'twin', 2, 'pending_approval', 'gcash_manual'],
+  [60, 'deluxe', 3, 'confirmed', 'gcash_manual'],
+  [65, 'triple', 2, 'confirmed', 'paymongo'],
+  [70, 'family', 2, 'pending_approval', 'gcash_manual'],
+  [75, 'single', 3, 'confirmed', 'gcash_manual'],
+  [80, 'twin', 2, 'confirmed', 'paymongo'],
+  [85, 'deluxe', 2, 'pending_approval', 'gcash_manual'],
+  [90, 'triple', 3, 'confirmed', 'gcash_manual'],
+  [95, 'family', 2, 'confirmed', 'paymongo']
 ]
 
 const mobileFor = (index: number) => `09${17 + (index % 8)}${String(1000000 + ((index * 7919) % 8999999)).slice(0, 7)}`
+
+const demoGuestStays = new Set([12, 15, 17, 18, 25, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36])
 
 export const seedDb = (): Db => {
   const base = today()
@@ -143,9 +156,10 @@ export const seedDb = (): Db => {
     return {
       reference: `LTW-${String(4200 + index * 17).padStart(4, '0')}`,
       roomId,
-      guestName: guestNames[index % guestNames.length],
-      guestMobile: mobileFor(index),
-      guestEmail: '',
+      ...(demoGuestStays.has(index) ? { userId: demoGuest.id } : {}),
+      guestName: demoGuestStays.has(index) ? demoGuest.name : guestNames[index % guestNames.length],
+      guestMobile: demoGuestStays.has(index) ? demoGuest.mobile : mobileFor(index),
+      guestEmail: demoGuestStays.has(index) ? demoGuest.email : '',
       guests: Math.min(roomById[roomId].sleeps, 1 + (index % 3)),
       checkIn,
       checkOut,

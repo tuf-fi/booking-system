@@ -26,34 +26,20 @@ const AMENITIES = [
 
 const HOUSE_RULES = [
   [
-    { label: 'Check-in from 2 PM', lines: [], Icon: Clock },
-    { label: 'Check-out until 11 AM', lines: [], Icon: Clock },
-    { label: 'Quiet hours 10 PM to 7 AM', lines: [], Icon: Moon },
-    { label: 'Up to {MAX_GUESTS} guests per room', lines: [], Icon: Users },
-    { label: 'Guests must be 18 or older to check in', lines: [], Icon: Check },
-    { label: 'Smoke-free property', lines: [], Icon: CircleX }
+    { label: 'Check-in', lines: ['From 2 PM'], Icon: Clock },
+    { label: 'Check-out', lines: ['Until 11 AM'], Icon: Clock },
+    { label: 'Quiet hours', lines: ['10 PM to 7 AM'], Icon: Moon },
+    { label: 'Guests', lines: ['Up to {MAX_GUESTS} per room'], Icon: Users }
   ],
   [
-    { label: 'Key card access, front desk open 24 hours', lines: [], Icon: KeyRound },
-    { label: 'Accessibility features', lines: [], Icon: Accessibility },
-    {
-      label: 'Pets welcome',
-      lines: [
-        'Dogs only, up to 6.8 kg, 2 per room.',
-        'A ₱3,000 cleaning fee applies per stay.'
-      ],
-      Icon: PawPrint
-    }
+    { label: 'Minimum age', lines: ['Guests must be 18 or older to check in'], Icon: Check },
+    { label: 'Smoke-free property', lines: ['Smoking is not allowed on the property'], Icon: CircleX },
+    { label: 'Accessibility', lines: ['Ask the front desk about accessibility features'], Icon: Accessibility },
+    { label: 'Entry and front desk', lines: ['Key card access, front desk open 24 hours'], Icon: KeyRound }
   ],
   [
-    {
-      label: 'On-site parking',
-      lines: [
-        'Daily ₱150, or valet ₱150 per stay.',
-        'Free for checked-in guests and restaurant patrons.'
-      ],
-      Icon: SquareParking
-    }
+    { label: 'Pets welcome', lines: ['Dogs only, up to 6.8 kg, 2 per room', 'A ₱3,000 cleaning fee applies per stay'], Icon: PawPrint },
+    { label: 'On-site parking', lines: ['Daily ₱150, or valet ₱150 per stay', 'Free for checked-in guests and restaurant patrons'], Icon: SquareParking }
   ]
 ]
 
@@ -79,7 +65,7 @@ export function Home() {
         <div className="flex w-full flex-1 flex-col justify-end gap-8 px-5 pb-8 pt-28 sm:gap-10 sm:px-10 sm:pb-14 lg:px-[7.5%] lg:pb-24">
           <div className="max-w-xl text-white">
             <p className="flex items-center gap-3 text-[0.7rem] font-bold uppercase tracking-[0.22em] text-white/85">
-              <span className="h-px w-7 bg-sun" aria-hidden />Legazpi City, Albay
+              <span className="h-px w-7 bg-leaf" aria-hidden />Legazpi City, Albay
             </p>
             <h1 className="mt-4 text-[2rem] font-extrabold leading-[1.1] sm:text-4xl lg:text-[2.75rem]">Wake up to Mayon from the roof deck.</h1>
             <p className="mt-4 max-w-md text-sm text-white/90 sm:text-base">Clean rooms, hot showers and fast Wi-Fi at local prices. Book direct and skip the booking-site fees.</p>
@@ -108,7 +94,7 @@ export function Home() {
           <div className="relative pb-10 pl-0 sm:pl-6">
             <figure className="relative overflow-hidden rounded-none">
               <Photo name="roof-deck" sizes="(min-width: 1024px) 640px, 100vw" className="aspect-[5/4] w-full object-cover" />
-              <figcaption className="glass absolute left-4 top-4 rounded-none px-3.5 py-1.5 text-[0.8125rem] font-bold">Roof deck, open 5 AM to 10 PM</figcaption>
+              <figcaption className="glass absolute left-4 top-4 rounded-full px-3.5 py-1.5 text-[0.8125rem] font-bold">Roof deck, open 5 AM to 10 PM</figcaption>
             </figure>
             <figure className="absolute bottom-0 left-4 w-[42%] overflow-hidden rounded-none shadow-lift ring-[6px] ring-paper sm:left-0 sm:w-[38%]">
               <Photo name="kitchen" sizes="(min-width: 1024px) 240px, 40vw" className="aspect-square w-full object-cover" />
@@ -188,24 +174,27 @@ export function Home() {
           </div>
 
           <div className="mt-20 lg:mt-24">
-            <h3 className="border-b border-line pb-5 text-xl font-extrabold leading-tight sm:text-2xl">House rules</h3>
-            <div className="mt-8 grid gap-x-12 gap-y-6 md:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <p className="eyebrow">Before you arrive</p>
+              <h3 className="mt-3 text-balance text-2xl font-extrabold leading-tight sm:text-3xl">House rules</h3>
+              <p className="mt-3 max-w-md text-pretty text-[0.9375rem] leading-[1.7] text-muted">A few simple rules to keep every stay comfortable for everyone.</p>
+            </div>
+            <div className="mt-10 grid items-start gap-x-12 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
               {HOUSE_RULES.map((column, index) => (
-                <dl key={index} className="space-y-5">
-                  {column.map(({ label: template, lines, Icon }) => {
-                    const label = template.replace('{MAX_GUESTS}', String(Math.max(...rooms.map(room => room.sleeps))))
-                    return (
-                    <div key={template} className="flex items-start gap-3">
+                <dl key={index} className="space-y-7">
+                  {column.map(({ label, lines, Icon }) => (
+                    <div key={label} className="flex items-start gap-3.5">
                       <Icon aria-hidden className="mt-0.5 size-5 shrink-0 text-leaf" strokeWidth={1.5} />
                       <div>
-                        <dt className={`text-[0.9375rem] font-bold leading-snug`}>{label}</dt>
-                        {lines.map((line) => (
-                          <dd key={line} className="mt-0.5 text-sm leading-[1.6] text-muted">{line}</dd>
+                        <dt className="text-[0.9375rem] font-bold leading-snug">{label}</dt>
+                        {lines.map(line => (
+                          <dd key={line} className="mt-1 text-[0.875rem] leading-[1.6] text-muted">
+                            {line.replace('{MAX_GUESTS}', String(Math.max(...rooms.map(room => room.sleeps))))}
+                          </dd>
                         ))}
                       </div>
                     </div>
-                    )
-                  })}
+                  ))}
                 </dl>
               ))}
             </div>
@@ -213,7 +202,11 @@ export function Home() {
         </section>
 
         <section aria-labelledby="pol-h" className="pt-24 lg:pt-32">
-          <h2 id="pol-h" className="text-balance text-2xl font-extrabold leading-tight sm:text-3xl">Payment and cancellation</h2>
+          <div>
+            <p className="eyebrow">Booking policy</p>
+            <h2 id="pol-h" className="mt-3 text-balance text-2xl font-extrabold leading-tight sm:text-3xl">Payment and cancellation</h2>
+            <p className="mt-3 max-w-md text-pretty text-[0.9375rem] leading-[1.7] text-muted">How the down payment works, and when you can cancel for a full refund.</p>
+          </div>
 
           <PolicyTimeline downPaymentPercent={db.settings.downPaymentPercent} cancellationDays={db.settings.cancellationDays} />
         </section>

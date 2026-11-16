@@ -2,24 +2,42 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { addDays, today } from '../lib/dates'
 import { isRangeFree } from '../lib/availability'
 import { approveBooking, cancelBooking, completeCardPayment, createBooking, DatesTakenError, findBooking, guestCancel, setBlockedNight, sweepExpired, type CreateBookingInput } from './api'
+import { resetAccounts } from './accounts'
+import { createVerifiedAccount } from './accounts.testing'
 import { commit, getDb, resetDb } from './db'
 
+let userId = ''
+
 const stay = (offset: number, nights: number, overrides: Partial<CreateBookingInput> = {}): CreateBookingInput => ({
+  userId,
   roomId: 'twin',
   checkIn: addDays(today(), offset),
   checkOut: addDays(today(), offset + nights),
   guestName: 'Test Guest',
   guestMobile: '09171234567',
-  guestEmail: '',
   guests: 2,
   method: 'gcash_manual',
   proof: 'data:image/jpeg;base64,AAAA',
   ...overrides
 })
 
-beforeEach(() => resetDb())
+beforeEach(async () => {
+  resetDb()
+  resetAccounts()
+  userId = (await createVerifiedAccount()).id
+})
 
 describe('createBooking', () => {
+  it('refuses guests without a verified account', async () => {
+    await expect(createBooking(stay(300, 2, { userId: 'nobody' }))).rejects.toThrow('Sign in')
+  })
+
+  it('links the booking to the account and uses its verified email', async () => {
+    const booking = await createBooking(stay(300, 2))
+    expect(booking.userId).toBe(userId)
+    expect(booking.guestEmail).toBe('guest@example.com')
+  })
+
   it('holds the nights and waits for approval on GCash', async () => {
     const booking = await createBooking(stay(300, 2))
     expect(booking.status).toBe('pending_approval')

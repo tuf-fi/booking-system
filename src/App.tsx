@@ -8,6 +8,12 @@ import { Bookings } from './pages/admin/Bookings'
 import { Dashboard } from './pages/admin/Dashboard'
 import { Reports } from './pages/admin/Reports'
 import { RoomsAndRates } from './pages/admin/RoomsAndRates'
+import { AccountLayout } from './pages/account/AccountLayout'
+import { Profile } from './pages/account/Profile'
+import { Saved } from './pages/account/Saved'
+import { Security } from './pages/account/Security'
+import { Trips } from './pages/account/Trips'
+import { Auth } from './pages/Auth'
 import { Book } from './pages/Book'
 import { Confirmation } from './pages/Confirmation'
 import { Home } from './pages/Home'
@@ -40,8 +46,17 @@ export default function App() {
             <Route path="book" element={<Book />} />
             <Route path="booking/:reference" element={<Confirmation />} />
             <Route path="manage" element={<Manage />} />
+            <Route path="account" element={<AccountLayout />}>
+              <Route index element={<Trips />} />
+              <Route path="saved" element={<Saved />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="security" element={<Security />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Route>
+          <Route path="signin" element={<Auth mode="signin" />} />
+          <Route path="signup" element={<Auth mode="signup" />} />
+          <Route path="forgot" element={<Auth mode="forgot" />} />
           <Route path="admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="bookings" element={<Bookings />} />

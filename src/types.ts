@@ -62,6 +62,7 @@ export type BookingSource = 'direct' | 'airbnb' | 'booking' | 'walk_in'
 
 export interface Booking {
   reference: string
+  userId?: string
   roomId: string
   guestName: string
   guestMobile: string

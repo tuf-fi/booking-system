@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check, CreditCard, ImagePlus, Smartphone, Users } from 'lucide-react'
 import type { Booking } from '../types'
+import { AuthFlow } from '../components/auth/AuthFlow'
 import { AvailabilityCalendar } from '../components/AvailabilityCalendar'
 import { CardCheckoutDialog } from '../components/CardCheckoutDialog'
 import { Photo } from '../components/Photo'
@@ -14,6 +15,7 @@ import { downscaleImage, plural } from '../lib/format'
 import { isRangeFree } from '../lib/availability'
 import { peso } from '../lib/money'
 import { quoteStay } from '../lib/pricing'
+import { signOut, useAccount } from '../store/accounts'
 import { createBooking, DatesTakenError, isValidMobile } from '../store/api'
 import { useDb } from '../store/db'
 
@@ -22,19 +24,19 @@ type Method = 'gcash_manual' | 'paymongo'
 interface FormState {
   name: string
   mobile: string
-  email: string
   guests: number
 }
 
 const STEPS = ['Room', 'Dates', 'Your details', 'Payment'] as const
 
-type Errors = Partial<Record<'name' | 'mobile' | 'email' | 'proof' | 'dates', string>>
+type Errors = Partial<Record<'name' | 'mobile' | 'proof' | 'dates', string>>
 
 const isDateKey = (value: string | null): value is DateKey => Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value))
 
 export function Book() {
   const db = useDb()
   const toast = useToast()
+  const account = useAccount()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const rooms = db.rooms.filter(room => room.isActive)
@@ -43,7 +45,7 @@ export function Book() {
   const [roomId, setRoomId] = useState(initialRoom.id)
   const [checkIn, setCheckIn] = useState<DateKey | null>(null)
   const [checkOut, setCheckOut] = useState<DateKey | null>(null)
-  const [form, setForm] = useState<FormState>({ name: '', mobile: '', email: '', guests: Math.min(Number(params.get('guests')) || 2, initialRoom.sleeps) })
+  const [form, setForm] = useState<FormState>({ name: '', mobile: '', guests: Math.min(Number(params.get('guests')) || 2, initialRoom.sleeps) })
   const [method, setMethod] = useState<Method>('gcash_manual')
   const [proof, setProof] = useState<string | null>(null)
   const [errors, setErrors] = useState<Errors>({})
@@ -54,8 +56,14 @@ export function Book() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const room = rooms.find(r => r.id === roomId) ?? rooms[0]
+  const gated = step === 2 && !account
   const hasDates = checkIn !== null && checkOut !== null
   const quote = useMemo(() => (hasDates ? quoteStay(room, db.settings, checkIn, checkOut) : null), [hasDates, room, db.settings, checkIn, checkOut])
+
+  useEffect(() => {
+    if (!account) return
+    setForm(current => ({ ...current, name: current.name || account.name, mobile: current.mobile || account.mobile }))
+  }, [account?.id])
 
   useEffect(() => {
     const requestedIn = params.get('in')
@@ -65,7 +73,7 @@ export function Book() {
         setCheckIn(requestedIn)
         setCheckOut(requestedOut)
       } else {
-        toast('Those dates are taken for this room. Pick new dates below.')
+        toast('Those dates are taken for this room. Pick new dates below.', 'warning')
       }
     }
   }, [])
@@ -78,7 +86,7 @@ export function Book() {
     if (checkIn && checkOut && !isRangeFree(db, id, checkIn, checkOut)) {
       setCheckIn(null)
       setCheckOut(null)
-      toast('Those dates are taken for this room. Pick new dates.')
+      toast('Those dates are taken for this room. Pick new dates.', 'warning')
     }
   }
 
@@ -98,9 +106,9 @@ export function Book() {
     const found: Errors = {}
     if (forStep === 1 && !hasDates) found.dates = 'Pick your check-in and check-out dates on the calendar.'
     if (forStep === 2) {
+      if (!account) return found
       if (form.name.trim().length < 2) found.name = 'Enter your full name.'
       if (!isValidMobile(form.mobile)) found.mobile = 'Enter an 11-digit mobile number, like 0917 123 4567.'
-      if (form.email.trim() && !/^\S+@\S+\.\S+$/.test(form.email.trim())) found.email = 'That email looks incomplete.'
     }
     if (forStep === 3 && method === 'gcash_manual' && !proof) found.proof = 'Upload your GCash screenshot so the owner can check it.'
     return found
@@ -113,6 +121,12 @@ export function Book() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
+    if (!account && step === 0) {
+      toast('Login to book', 'warning')
+      navigate(`/signin?next=${encodeURIComponent(`/book?room=${room.id}`)}`)
+      return
+    }
+    if (!account) return
     const found = validate(step)
     setErrors(found)
     if (Object.keys(found).length) {
@@ -128,12 +142,12 @@ export function Book() {
     setSubmitting(true)
     try {
       const booking = await createBooking({
+        userId: account.id,
         roomId: room.id,
         checkIn: checkIn!,
         checkOut: checkOut!,
         guestName: form.name,
         guestMobile: form.mobile,
-        guestEmail: form.email,
         guests: form.guests,
         method,
         proof: method === 'gcash_manual' ? proof : null
@@ -144,10 +158,10 @@ export function Book() {
       if (failure instanceof DatesTakenError) {
         setCheckIn(null)
         setCheckOut(null)
-        toast('Someone just booked those dates. Pick new dates.')
+        toast('Someone just booked those dates. Pick new dates.', 'warning')
         goTo(1)
       } else {
-        toast(failure instanceof Error ? failure.message : 'Something went wrong. Please try again.')
+        toast(failure instanceof Error ? failure.message : 'Something went wrong. Please try again.', 'error')
       }
     } finally {
       setSubmitting(false)
@@ -212,6 +226,14 @@ export function Book() {
       <p className="mt-3 text-[0.8125rem] font-bold text-muted sm:hidden">Step {step + 1} of {STEPS.length}: {STEPS[step]}</p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start xl:gap-12">
+        {gated ? (
+          <div className="min-w-0">
+            <div className="border border-line bg-surface p-6 sm:p-8">
+              <AuthFlow key="book-auth" embedded initialMode="signin" onSignedIn={() => undefined} />
+            </div>
+            <button type="button" onClick={() => goTo(1)} className="mt-6 inline-flex min-h-11 cursor-pointer items-center gap-2 text-[0.9375rem] font-bold text-ink transition-colors hover:text-leaf"><ArrowLeft size={16} aria-hidden />Back</button>
+          </div>
+        ) : (
         <form onSubmit={submit} noValidate className="min-w-0">
           {step === 0 && (
             <section aria-labelledby="room-h" className="space-y-8">
@@ -299,11 +321,10 @@ export function Book() {
                   </select>
                   <p className="mt-1.5 text-[0.8125rem] text-muted">This room sleeps up to {room.sleeps}.</p>
                 </div>
-                <div className="sm:col-span-2">
-                  <label className="label" htmlFor="f-email">Email <span className="font-medium text-muted">(optional)</span></label>
-                  <input id="f-email" type="email" className="field field-compact rounded-none" autoComplete="email" value={form.email} onChange={e => update('email', e.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'e-email' : undefined} />
-                  {errors.email && <p id="e-email" className="mt-1.5 text-[0.8125rem] text-danger">{errors.email}</p>}
-                </div>
+                <p className="text-[0.875rem] text-muted sm:col-span-2">
+                  Confirmation goes to <b className="text-ink">{account?.email}</b>.{' '}
+                  <button type="button" onClick={() => signOut()} className="font-bold text-leaf hover:underline">Not you? Sign out</button>
+                </p>
               </div>
             </section>
           )}
@@ -359,6 +380,7 @@ export function Book() {
             </button>
           </div>
         </form>
+        )}
 
         <aside aria-live="polite" className="lg:sticky lg:top-20">
           <div className="glass-strong overflow-hidden shadow-lift">

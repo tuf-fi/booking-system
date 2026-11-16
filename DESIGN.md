@@ -20,6 +20,7 @@ Warm, calm and photo-led, in the spirit of Airbnb and Vrbo: large rounded photos
 | sun / sun-tint / sun-ink | #F2B33D / #FBEFD0 / #7A5200 | Waiting states, references, highlights |
 | sky-tint / sky-ink | #E3EEF3 / #1F4B62 | Payment instructions, staying now |
 | danger / danger-tint | #A8402E / #F7E4DF | Errors, cancel, blocked dates |
+| heart | #FF4D5E | Saved-room heart on photos |
 
 Text on tinted backgrounds uses the matching `-ink` or `-deep` token to keep contrast above 4.5:1.
 
@@ -58,6 +59,13 @@ Rules:
 - `.field` inputs with a visible 3 px focus ring and `aria-invalid` styling.
 - `AvailabilityCalendar`: price per night in every cell, bold on Friday and Saturday, striped when booked, ink for start and end, `leaf-tint` for the range.
 - `StatusChip` maps each booking status to one tone. Don't invent new status colors.
+
+## Sign-in and account
+
+- Auth screens are solid forms (square fields, `btn-primary rounded-none`) beside a Mayon photo with one `.glass-strong` caption. Inside the booking flow the same `AuthFlow` renders inline at the "Your details" step, with no photo and no dialog.
+- The code step shows a sky-tint demo panel with the code until a real mailer exists.
+- The navbar user icon links to `/signin`, or to `/account` as an initials avatar once signed in.
+- The account area uses underline tabs (Trips, Saved rooms, Profile, Security) and square bordered cards. Trip status uses `StatusChip`.
 
 ## Motion
 

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowRight, Menu, Phone, X } from 'lucide-react'
+import { ArrowRight, Menu, Phone, UserRound, X } from 'lucide-react'
+import { signOut, useAccount } from '../store/accounts'
+import { AccountMenu } from './AccountMenu'
 import { Logo } from './Logo'
 
 const SECTIONS = [
@@ -14,8 +16,8 @@ export const scrollToSection = (id: string) => {
   document.getElementById(id)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
 }
 
-const linkBase = 'group relative px-3.5 py-2 text-[0.9375rem] tracking-normal transition-colors duration-300'
-const linkTone = (isActive: boolean) => (isActive ? 'text-ink' : 'text-ink/60 hover:text-ink')
+const linkBase = 'group relative px-3 py-2 text-[0.8125rem] tracking-normal transition-colors duration-300'
+const linkTone = (isActive: boolean) => (isActive ? 'font-bold text-ink' : 'font-bold text-ink/75 hover:text-ink')
 
 function ActiveDot({ isActive }: { isActive: boolean }) {
   return (
@@ -61,6 +63,7 @@ export function SiteLayout() {
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
+  const account = useAccount()
   const menuRef = useRef<HTMLDivElement>(null)
   const isHome = location.pathname === '/'
   const active = useActiveSection(isHome)
@@ -108,7 +111,7 @@ export function SiteLayout() {
       <header className="sticky top-0 z-40 h-0">
         <div ref={menuRef} className="mx-auto max-w-5xl px-3 pt-2.5 sm:pt-3">
           <div className={`flex h-14 items-center justify-between gap-3 rounded-full pl-3 pr-2 transition-all duration-300 md:grid md:grid-cols-[1fr_auto_1fr] sm:h-16 sm:pl-4 sm:pr-2.5 ${scrolled || open || !isHome ? 'glass-strong' : 'glass'}`}>
-            <Link to="/" aria-label="Lantaw Inn, home" className="flex items-center gap-2.5 justify-self-start rounded-full py-1 pr-3 font-display text-lg font-extrabold tracking-normal">
+            <Link to="/" aria-label="Lantaw Inn, home" className="flex items-center gap-2.5 justify-self-start rounded-full py-1 pr-3 font-display text-base font-extrabold tracking-normal">
               <Logo className="size-8" />
               <span>Lantaw</span>
             </Link>
@@ -134,7 +137,14 @@ export function SiteLayout() {
             </nav>
 
             <div className="flex items-center gap-1.5 justify-self-end">
-              <Link to="/book" className="group btn btn-dark hidden h-10 min-h-0 px-5 text-sm sm:inline-flex">
+              {account ? (
+                <AccountMenu account={account} />
+              ) : (
+                <Link to="/signin" aria-label="Sign in" className="grid size-10 place-items-center rounded-full text-ink transition-colors hover:bg-ink/[0.06]">
+                  <UserRound size={22} aria-hidden />
+                </Link>
+              )}
+              <Link to="/book" className="group btn btn-dark hidden h-9 min-h-0 px-4 text-[0.8125rem] sm:inline-flex">
                 Book now<ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5" />
               </Link>
               <button type="button" onClick={() => setOpen(value => !value)} aria-expanded={open} aria-controls="mobile-nav" aria-label={open ? 'Close menu' : 'Open menu'} className="grid size-10 place-items-center rounded-full transition-colors hover:bg-ink/[0.06] md:hidden">
@@ -161,6 +171,19 @@ export function SiteLayout() {
                       <ArrowRight size={16} className="text-muted" />
                     </Link>
                   </li>
+                  <li>
+                    <Link to={account ? '/account' : '/signin'} tabIndex={open ? 0 : -1} className="flex items-center justify-between rounded-2xl px-4 py-3.5 text-base font-bold hover:bg-sand">
+                      {account ? 'My account' : 'Sign in'}
+                      <ArrowRight size={16} className="text-muted" />
+                    </Link>
+                  </li>
+                  {account && (
+                    <li>
+                      <button type="button" tabIndex={open ? 0 : -1} onClick={() => { signOut(); setOpen(false); navigate('/') }} className="flex w-full items-center justify-between rounded-2xl px-4 py-3.5 text-left text-base font-bold text-danger hover:bg-sand">
+                        Log out
+                      </button>
+                    </li>
+                  )}
                 </ul>
                 <div className="mt-2 flex items-center gap-2 border-t border-line pt-3">
                   <Link to="/book" tabIndex={open ? 0 : -1} className="btn btn-primary flex-1">Book now</Link>
@@ -192,6 +215,7 @@ export function SiteLayout() {
               ))}
               <li><Link className="transition-colors hover:text-white" to="/book">Book a room</Link></li>
               <li><Link className="transition-colors hover:text-white" to="/manage">Manage booking</Link></li>
+              <li><Link className="transition-colors hover:text-white" to={account ? '/account' : '/signin'}>{account ? 'My account' : 'Sign in'}</Link></li>
             </ul>
           </nav>
           <div>

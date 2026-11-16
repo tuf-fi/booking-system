@@ -69,6 +69,10 @@ npm test
 npm run build
 ```
 
+- Guest accounts: booking needs a verified account. Pages: `/#/signin`, `/#/signup`, `/#/forgot` and `/#/account` (trips, saved rooms, profile, security). The seeded guest is `guest@lantaw.test` / `Guest1234` and is prefilled on the sign-in form; sign-up is prefilled with sample details.
+- Verification: every sign-in, sign-up and password reset ends with a 6-digit email code. No email is sent in the demo, so the code is shown in a labelled demo panel. Codes last 10 minutes, allow 5 tries and can be resent after 30 seconds. Five wrong passwords lock sign-in for 5 minutes.
+- Google sign-in: shows a demo account chooser until `VITE_GOOGLE_CLIENT_ID` is set, then uses real Google sign-in. It still asks for the email code afterwards.
+- Accounts live in `localStorage` under `lantaw-accounts-v1` (passwords hashed with PBKDF2) through `src/store/accounts.ts`. On the Laravel backend, replace this with Laravel auth, a mailer for the codes, and server-side Google token verification. `createBooking` already refuses unverified accounts and must keep doing so.
 - Guest site: `/#/`. Owner admin: `/#/admin` (login `owner@lantaw.test` / `password`, prefilled). **Reset demo** in the admin restores the sample data.
 - `dist/` after `npm run build` is a static site that works on any host or from a plain file server.
 - All data access goes through `src/store/api.ts`. When the Laravel backend arrives, replace these functions with Inertia or HTTP calls and the pages stay as they are.
@@ -294,5 +298,6 @@ docs/
 - For UI work, `/impeccable critique` and `/impeccable audit` have been run and their findings fixed.
 - No code comments, no placeholder images.
 - New stock photos are listed in `docs/photo-credits.md`.
-#   b o o k i n g - s y s t e m  
+#   b o o k i n g - s y s t e m 
+ 
  

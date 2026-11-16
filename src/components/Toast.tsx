@@ -1,33 +1,21 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
-import { CheckCircle2 } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { toast, Toaster } from 'sonner'
 
-type Notify = (message: string) => void
+type Kind = 'success' | 'warning' | 'error'
 
-const ToastContext = createContext<Notify>(() => undefined)
+type Notify = (message: string, kind?: Kind) => void
 
-export const useToast = () => useContext(ToastContext)
+const notify: Notify = (message, kind = 'success') => {
+  toast[kind](message)
+}
+
+export const useToast = () => notify
 
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [message, setMessage] = useState<string | null>(null)
-  const timer = useRef<number>(0)
-
-  const notify = useCallback<Notify>(text => {
-    setMessage(text)
-    window.clearTimeout(timer.current)
-    timer.current = window.setTimeout(() => setMessage(null), 3200)
-  }, [])
-
   return (
-    <ToastContext.Provider value={notify}>
+    <>
       {children}
-      <div aria-live="polite" role="status" className="pointer-events-none fixed inset-x-0 bottom-6 z-[60] flex justify-center px-4">
-        {message && (
-          <div className="glass-dark pointer-events-auto flex max-w-md items-center gap-3 rounded-full px-5 py-3 text-sm font-semibold">
-            <CheckCircle2 size={18} className="shrink-0 text-sun" />
-            {message}
-          </div>
-        )}
-      </div>
-    </ToastContext.Provider>
+      <Toaster theme="light" position="bottom-center" />
+    </>
   )
 }
