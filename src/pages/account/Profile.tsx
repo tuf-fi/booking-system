@@ -91,7 +91,7 @@ export function Profile() {
               <input
                 id={`p-${field}`}
                 autoFocus
-                className="field field-compact rounded-none"
+                className="field field-compact"
                 value={draft}
                 onChange={event => setDraft(event.target.value)}
                 max={config.input.type === 'date' ? today() : undefined}
@@ -99,10 +99,10 @@ export function Profile() {
                 aria-describedby={error ? `p-${field}-error` : undefined}
                 {...config.input}
               />
-              {error && <p id={`p-${field}-error`} role="alert" className="mt-1.5 text-[0.8125rem] text-danger">{error}</p>}
+              {error && <p id={`p-${field}-error`} role="alert" className="mt-1.5 text-sm text-danger">{error}</p>}
             </div>
-            <button type="submit" disabled={busy} className="btn btn-primary btn-sm h-[2.6rem] rounded-none px-5">{busy ? 'Saving…' : 'Save'}</button>
-            <button type="button" onClick={cancel} className="btn btn-ghost btn-sm h-[2.6rem] rounded-none px-4">Cancel</button>
+            <button type="submit" disabled={busy} className="btn btn-primary btn-sm h-[2.6rem] px-5">{busy ? 'Saving…' : 'Save'}</button>
+            <button type="button" onClick={cancel} className="btn btn-ghost btn-sm h-[2.6rem] px-4">Cancel</button>
           </div>
         </form>
       )
@@ -111,13 +111,13 @@ export function Profile() {
       <div key={field} className="group flex items-center justify-between gap-4 py-2.5">
         <div className="min-w-0">
           <p className="text-xs text-muted">{label}</p>
-          <p className={`mt-0.5 break-words text-[0.875rem] ${value ? 'font-bold' : 'text-muted/70'}`}>{value ? showValue(field, value) : empty}</p>
+          <p className={`mt-0.5 break-words text-sm ${value ? 'font-bold' : 'text-muted/70'}`}>{value ? showValue(field, value) : empty}</p>
         </div>
         <button
           type="button"
           onClick={() => start(field)}
           aria-label={`${value ? 'Edit' : 'Add'} ${label.toLowerCase()}`}
-          className="grid size-8 shrink-0 place-items-center text-muted transition-colors hover:bg-sand hover:text-ink"
+          className="grid size-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-sand hover:text-ink"
         >
           {value ? <Pencil size={14} aria-hidden /> : <Plus size={16} aria-hidden />}
         </button>
@@ -134,9 +134,9 @@ export function Profile() {
               <Avatar profile={account} className="size-16 text-xl" />
               <input ref={fileRef} id="p-photo" type="file" accept="image/*" className="sr-only" onChange={event => onPhoto(event.target.files?.[0])} />
               <div className="flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="btn btn-ghost btn-sm rounded-none"><Camera size={15} aria-hidden />{uploading ? 'Uploading…' : account.avatar ? 'Change photo' : 'Add photo'}</button>
+                <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="btn btn-ghost btn-sm"><Camera size={15} aria-hidden />{uploading ? 'Uploading…' : account.avatar ? 'Change photo' : 'Add photo'}</button>
                 {account.avatar && (
-                  <button type="button" onClick={() => { setAvatar(account.id, null); toast('Your profile photo was removed.') }} className="btn btn-ghost btn-sm rounded-none text-danger">Remove</button>
+                  <button type="button" onClick={() => { setAvatar(account.id, null); toast('Your profile photo was removed.') }} className="btn btn-danger btn-sm">Remove</button>
                 )}
               </div>
             </div>
@@ -145,9 +145,9 @@ export function Profile() {
             {item('mobile', 'Mobile number')}
             <div className="py-2.5">
               <p className="text-xs text-muted">Email</p>
-              <p className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 break-words text-[0.875rem] font-bold">
+              <p className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 break-words text-sm font-bold">
                 {account.email}
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-leaf-deep"><BadgeCheck size={13} aria-hidden />Verified</span>
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-primary-deep"><BadgeCheck size={13} aria-hidden />Verified</span>
               </p>
             </div>
           </AccountCard>

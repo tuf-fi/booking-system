@@ -25,7 +25,7 @@ function NotFound() {
     <div className="container-page py-24 text-center">
       <h1 className="text-4xl font-extrabold">Page not found</h1>
       <p className="mt-3 text-muted">That page does not exist. Head back to the inn.</p>
-      <a href="#/" className="btn btn-dark mt-8">Back to Lantaw Inn</a>
+      <a href="#/" className="btn btn-secondary mt-8">Back to Lantaw Inn</a>
     </div>
   )
 }

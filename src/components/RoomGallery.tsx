@@ -33,7 +33,7 @@ export function RoomGallery({ room }: { room: Room }) {
 
   return (
     <div
-      className="relative overflow-hidden bg-sand"
+      className="relative overflow-hidden rounded-card bg-sand"
       role="group"
       aria-roledescription="carousel"
       aria-label={`${room.name} photos`}

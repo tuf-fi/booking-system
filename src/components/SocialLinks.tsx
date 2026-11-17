@@ -36,7 +36,7 @@ export function SocialLinks() {
             target="_blank"
             rel="noreferrer"
             aria-label={`${label} (opens in a new tab)`}
-            className="grid size-8 place-items-center bg-ink text-white transition-colors hover:bg-leaf"
+            className="grid size-8 place-items-center rounded-full bg-secondary text-white transition-colors hover:bg-primary"
           >
             <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{paths}</svg>
           </a>

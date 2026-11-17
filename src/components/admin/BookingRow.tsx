@@ -20,7 +20,7 @@ export function BookingRow({ booking }: { booking: Booking }) {
       <div>
         <p className="font-bold">{booking.reference}</p>
         <p className="mt-0.5 text-xs text-muted">{SOURCE_LABEL[booking.source] || METHOD_LABEL[booking.method]}</p>
-        {!booking.seen && <span className="chip mt-1 bg-sun-tint text-sun-ink">New</span>}
+        {!booking.seen && <span className="chip mt-1 bg-accent-tint text-accent-deep">New</span>}
       </div>
       <div className="min-w-0">
         <p className="truncate font-semibold">{booking.guestName}</p>

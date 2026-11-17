@@ -32,10 +32,10 @@ export function AccountLayout() {
           <Avatar profile={account} className="size-12 text-base" />
           <div className="min-w-0">
             <h1 className="truncate text-xl font-extrabold leading-tight">Hi, {firstName(account.name)}</h1>
-            <p className="mt-0.5 truncate text-[0.8125rem] text-muted">{account.email} · Member since {memberSince}</p>
+            <p className="mt-0.5 truncate text-sm text-muted">{account.email} · Member since {memberSince}</p>
           </div>
         </div>
-        <Link to="/book" className="btn btn-primary h-10 min-h-0 rounded-none px-5 text-[0.8125rem]">Book a room</Link>
+        <Link to="/book" className="btn btn-primary h-10 min-h-0 px-5 text-sm">Book a room</Link>
       </header>
 
       <nav ref={tabsRef} aria-label="Account" className="-mx-5 mt-6 overflow-x-auto overflow-y-hidden border-b border-line px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
@@ -45,7 +45,7 @@ export function AccountLayout() {
               <NavLink
                 to={to}
                 end={end}
-                className={({ isActive }) => `inline-flex min-h-11 items-center gap-2 border-b-2 px-3.5 text-[0.8125rem] font-bold transition-colors ${isActive ? 'border-ink text-ink' : 'border-transparent text-muted hover:text-ink'}`}
+                className={({ isActive }) => `inline-flex min-h-11 items-center gap-2 border-b-2 px-3.5 text-sm font-bold transition-colors ${isActive ? 'border-ink text-ink' : 'border-transparent text-muted hover:text-ink'}`}
               >
                 <Icon size={15} aria-hidden />
                 {label}

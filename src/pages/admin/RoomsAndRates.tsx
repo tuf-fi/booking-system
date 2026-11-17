@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { ImageIcon } from 'lucide-react'
 import type { Room, Settings } from '../../types'
 import { Photo } from '../../components/Photo'
+import { PageHeader } from '../../components/PageHeader'
 import { useToast } from '../../components/Toast'
 import { photos } from '../../data/photos'
 import { centavosToPesos, pesosToCentavos } from '../../lib/money'
@@ -70,8 +71,7 @@ export function RoomsAndRates() {
 
   return (
     <form onSubmit={save}>
-      <h1 className="text-4xl font-extrabold">Rooms and rates</h1>
-      <p className="mt-1 text-muted">Guests see new rates as soon as you save. Existing bookings keep the price they booked at.</p>
+      <PageHeader title="Rooms and rates" description="Guests see new rates as soon as you save. Existing bookings keep the price they booked at." />
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-start">
         <section className="card divide-y divide-line">
@@ -81,7 +81,7 @@ export function RoomsAndRates() {
             return (
               <div key={room.id} className="grid gap-4 p-5 sm:grid-cols-[7rem_1fr]">
                 <div className="relative">
-                  <Photo name={room.photo} sizes="112px" className="aspect-[4/3] w-full rounded-xl object-cover" />
+                  <Photo name={room.photo} sizes="112px" className="aspect-[4/3] w-full rounded-control object-cover" />
                 </div>
                 <div>
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -90,7 +90,7 @@ export function RoomsAndRates() {
                       <p className="text-sm text-muted">Sleeps {room.sleeps}, {room.beds}</p>
                     </div>
                     <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
-                      <input type="checkbox" className="size-4 accent-leaf" checked={draft.isActive} onChange={e => patchRoom(room.id, { isActive: e.target.checked })} />
+                      <input type="checkbox" className="size-4 accent-primary" checked={draft.isActive} onChange={e => patchRoom(room.id, { isActive: e.target.checked })} />
                       Open for booking
                     </label>
                   </div>
@@ -105,7 +105,7 @@ export function RoomsAndRates() {
                     </div>
                   </div>
                   {photo.isStock && (
-                    <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-sun-tint px-3 py-1 text-xs font-bold text-sun-ink"><ImageIcon size={13} />Stock photo. Replace with your own photo.</p>
+                    <p className="chip mt-3 bg-accent-tint text-accent-deep"><ImageIcon size={11} />Stock photo. Replace with your own photo.</p>
                   )}
                 </div>
               </div>

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 
-export const FIELD_SHELL = 'relative rounded-xl bg-ink/[0.045] transition-colors focus-within:bg-ink/[0.07] lg:rounded-full lg:bg-transparent lg:hover:bg-ink/[0.045] lg:focus-within:bg-ink/[0.06]'
+export const FIELD_SHELL = 'relative rounded-control lg:rounded-full bg-ink/[0.045] transition-colors focus-within:bg-ink/[0.07] has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-primary lg:bg-transparent lg:hover:bg-ink/[0.045] lg:focus-within:bg-ink/[0.06]'
 export const FIELD_PAD = 'block w-full px-3.5 py-2 text-left lg:px-5 lg:py-1.5'
-export const FIELD_LABEL = 'block text-[0.625rem] font-bold uppercase leading-4 tracking-[0.12em] text-muted'
-export const FIELD_VALUE = 'block h-6 w-full truncate text-[0.8125rem] font-semibold leading-6 text-ink'
+export const FIELD_LABEL = 'block text-xs font-bold uppercase leading-4 tracking-[0.1em] text-muted'
+export const FIELD_VALUE = 'block h-6 w-full truncate text-base font-semibold leading-6 text-ink'
 
 export interface SelectOption {
   value: string
@@ -123,7 +123,7 @@ export function SearchSelect({ label, value, options, onChange, className = '' }
           id={listId}
           role="listbox"
           aria-label={label}
-          className={`menu-pop absolute left-0 z-50 w-full min-w-56 overflow-hidden rounded-2xl border border-line bg-surface p-1.5 shadow-lift lg:w-max ${opensUp ? 'bottom-full mb-2 origin-bottom' : 'top-full mt-2 origin-top'}`}
+          className={`menu-pop absolute left-0 z-50 w-full min-w-56 overflow-hidden rounded-card border border-line bg-surface p-1.5 shadow-lift lg:w-max ${opensUp ? 'bottom-full mb-2 origin-bottom' : 'top-full mt-2 origin-top'}`}
         >
           {options.map((option, index) => {
             const isSelected = option.value === value
@@ -135,10 +135,10 @@ export function SearchSelect({ label, value, options, onChange, className = '' }
                 aria-selected={isSelected}
                 onPointerEnter={() => setActive(index)}
                 onClick={() => choose(index)}
-                className={`flex h-10 cursor-pointer items-center justify-between gap-6 rounded-xl px-3 text-[0.8125rem] font-semibold transition-colors ${index === active ? 'bg-ink/[0.06]' : ''} ${isSelected ? 'text-ink' : 'text-ink/80'}`}
+                className={`flex h-10 cursor-pointer items-center justify-between gap-6 rounded-control px-3 text-sm font-semibold transition-colors ${index === active ? 'bg-ink/[0.06]' : ''} ${isSelected ? 'text-ink' : 'text-ink/80'}`}
               >
                 <span className="flex items-center gap-2">
-                  <Check size={14} aria-hidden className={isSelected ? 'text-leaf' : 'invisible'} />
+                  <Check size={14} aria-hidden className={isSelected ? 'text-primary' : 'invisible'} />
                   {option.label}
                 </span>
                 {option.hint && <span className="text-xs font-medium text-muted">{option.hint}</span>}

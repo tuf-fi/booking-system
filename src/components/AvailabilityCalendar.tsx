@@ -17,7 +17,7 @@ interface Props {
 }
 
 const dateInput =
-  'mt-1.5 block w-full border border-line bg-surface px-3 py-2.5 text-[0.9375rem] font-bold text-ink transition-[border-color,box-shadow] hover:border-ink/30 focus:border-leaf focus:outline-none focus:shadow-[0_0_0_4px_var(--color-leaf-tint)]'
+  'mt-1.5 block w-full border border-line bg-surface px-3 py-2.5 text-base font-bold text-ink transition-[border-color,box-shadow] hover:border-ink/30 focus:border-primary focus:outline-none focus:shadow-[0_0_0_4px_var(--color-primary-tint)]'
 
 export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onRejected }: Props) {
   const db = useDb()
@@ -88,7 +88,7 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
           <input id="date-out" type="date" className={dateInput} min={checkIn ? addDays(checkIn, 1) : addDays(now, 1)} value={checkOut ?? ''} onChange={event => typeCheckOut(event.target.value)} />
         </div>
       </div>
-      <p className="mt-2 min-h-5 text-[0.8125rem] text-muted" aria-live="polite">
+      <p className="mt-2 min-h-5 text-sm text-muted" aria-live="polite">
         {nights > 0 ? <><b className="text-ink">{plural(nights, 'night')}</b>, {formatDay(checkIn!)} to {formatDay(checkOut!)}</> : 'Type your dates, or pick them on the calendar below.'}
       </p>
 
@@ -101,7 +101,7 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
               onClick={() => setMonth(addMonths(month, -1))}
               disabled={month <= monthStart(now)}
               aria-label="Previous month"
-              className="grid size-9 place-items-center border border-line bg-surface transition-colors hover:bg-sand disabled:pointer-events-none disabled:opacity-30"
+              className="grid size-9 place-items-center rounded-full border border-line bg-surface transition-colors hover:bg-sand disabled:pointer-events-none disabled:opacity-30"
             >
               <ChevronLeft size={16} />
             </button>
@@ -109,7 +109,7 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
               type="button"
               onClick={() => setMonth(addMonths(month, 1))}
               aria-label="Next month"
-              className="grid size-9 place-items-center border border-line bg-surface transition-colors hover:bg-sand"
+              className="grid size-9 place-items-center rounded-full border border-line bg-surface transition-colors hover:bg-sand"
             >
               <ChevronRight size={16} />
             </button>
@@ -131,14 +131,14 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
             const price = nightRate(room, night)
             const marked = isStart || isEnd
             const tone = marked
-              ? 'bg-ink text-white'
+              ? 'rounded-control bg-secondary text-white'
               : inRange
-                ? 'bg-leaf-tint text-ink'
+                ? 'bg-primary-tint text-ink'
                 : isTaken
                   ? 'text-muted/60'
                   : past
                     ? 'text-muted/40'
-                    : 'text-ink hover:bg-sand'
+                    : 'rounded-control text-ink hover:bg-sand'
             return (
               <button
                 key={night}
@@ -154,11 +154,11 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
               >
                 <span className={isTaken && !marked ? 'line-through' : ''}>{parseKey(night).getUTCDate()}</span>
                 {!past && (
-                  <span className={`text-[0.6875rem] font-medium leading-none ${marked ? 'text-white/80' : isWeekendNight(night) && !isTaken ? 'font-bold text-ink' : 'text-muted'}`}>
+                  <span className={`text-xs font-medium leading-none ${marked ? 'text-white/80' : isWeekendNight(night) && !isTaken ? 'font-bold text-ink' : 'text-muted'}`}>
                     {isTaken && !marked ? '' : compactPeso(price)}
                   </span>
                 )}
-                {night === now && !marked && <span className="absolute bottom-1 size-1 bg-leaf" aria-hidden />}
+                {night === now && !marked && <span className="absolute bottom-1 size-1 bg-primary" aria-hidden />}
               </button>
             )
           })}
@@ -166,7 +166,7 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted">
-        <span className="flex items-center gap-2"><i className="size-3.5 bg-ink" />Your stay</span>
+        <span className="flex items-center gap-2"><i className="size-3.5 bg-secondary" />Your stay</span>
         <span className="flex items-center gap-2"><i className="size-3.5 bg-[repeating-linear-gradient(-45deg,var(--color-sand)_0_3px,#d9d3c6_3px_6px)]" />Booked</span>
         <span>Price per night, bold on Friday and Saturday</span>
       </div>

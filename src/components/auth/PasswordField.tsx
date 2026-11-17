@@ -26,7 +26,7 @@ export function PasswordField({ id, label, value, onChange, autoComplete, error,
         <input
           id={id}
           type={visible ? 'text' : 'password'}
-          className="field field-compact rounded-none pr-12"
+          className="field field-compact pr-12"
           value={value}
           onChange={event => onChange(event.target.value)}
           autoComplete={autoComplete}
@@ -44,9 +44,9 @@ export function PasswordField({ id, label, value, onChange, autoComplete, error,
         </button>
       </div>
       {error ? (
-        <p id={`${id}-error`} className="mt-1.5 text-[0.8125rem] text-danger">{error}</p>
+        <p id={`${id}-error`} className="mt-1.5 text-sm text-danger">{error}</p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="mt-1.5 text-[0.8125rem] text-muted">{hint}</p>
+        <p id={`${id}-hint`} className="mt-1.5 text-sm text-muted">{hint}</p>
       ) : null}
     </div>
   )

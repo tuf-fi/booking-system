@@ -18,7 +18,7 @@ const pageItems = (page: number, pages: number): (number | 'gap')[] => {
   return items
 }
 
-const BUTTON = 'grid size-9 place-items-center text-[0.8125rem] font-bold transition-colors duration-200'
+const BUTTON = 'grid size-9 place-items-center rounded-full text-sm font-bold transition-colors duration-200'
 
 export function Pagination({ page, pageSize, total, onChange }: PaginationProps) {
   const pages = Math.max(1, Math.ceil(total / pageSize))
@@ -40,7 +40,7 @@ export function Pagination({ page, pageSize, total, onChange }: PaginationProps)
             <li key={`gap-${index}`} aria-hidden className="grid size-9 place-items-center text-muted">…</li>
           ) : (
             <li key={item}>
-              <button type="button" onClick={() => onChange(item)} aria-current={item === page ? 'page' : undefined} aria-label={`Page ${item}`} className={`${BUTTON} tabular-nums ${item === page ? 'bg-ink text-white' : 'text-muted hover:bg-sand hover:text-ink'}`}>
+              <button type="button" onClick={() => onChange(item)} aria-current={item === page ? 'page' : undefined} aria-label={`Page ${item}`} className={`${BUTTON} tabular-nums ${item === page ? 'bg-secondary text-white' : 'text-muted hover:bg-sand hover:text-ink'}`}>
                 {item}
               </button>
             </li>

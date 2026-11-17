@@ -1,4 +1,5 @@
 import { Download } from 'lucide-react'
+import { PageHeader } from '../../components/PageHeader'
 import { compactPeso, peso } from '../../lib/money'
 import { formatMonth, monthStart, today } from '../../lib/dates'
 import { downloadCsv, occupancyForMonth, revenueSeries } from '../../lib/reports'
@@ -24,13 +25,11 @@ export function Reports() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-extrabold">Reports</h1>
-          <p className="mt-1 text-muted">Money received and how full the rooms are.</p>
-        </div>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={exportCsv}><Download size={14} />Export CSV</button>
-      </div>
+      <PageHeader
+        title="Reports"
+        description="Money received and how full the rooms are."
+        actions={<button type="button" className="btn btn-ghost btn-sm" onClick={exportCsv}><Download size={14} />Export CSV</button>}
+      />
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <section className="card p-6" aria-labelledby="rev-h">
@@ -40,7 +39,7 @@ export function Reports() {
             {series.map((point, index) => (
               <li key={point.key} className="flex h-full flex-1 flex-col items-center justify-end gap-2 text-xs">
                 <b className="tabular-nums">{point.value ? compactPeso(point.value) : '0'}</b>
-                <span className={`w-full max-w-16 rounded-t-xl rounded-b-sm ${index === series.length - 1 ? 'bg-sun' : 'bg-leaf'}`} style={{ height: `${Math.max(2, (point.value / max) * 150)}px` }} role="img" aria-label={`${formatMonth(point.key)}: ${peso(point.value)}`} />
+                <span className={`w-full max-w-16 rounded-control ${index === series.length - 1 ? 'bg-accent' : 'bg-primary'}`} style={{ height: `${Math.max(2, (point.value / max) * 150)}px` }} role="img" aria-label={`${formatMonth(point.key)}: ${peso(point.value)}`} />
                 <span className="text-muted">{point.label}</span>
               </li>
             ))}
@@ -56,7 +55,7 @@ export function Reports() {
               return (
                 <li key={room.id} className="grid grid-cols-[8.5rem_1fr_3rem] items-center gap-3 text-sm">
                   <span className="truncate font-semibold">{room.name}</span>
-                  <span className="h-2.5 overflow-hidden rounded-full bg-leaf-tint"><i className="block h-full rounded-full bg-leaf" style={{ width: `${percent}%` }} /></span>
+                  <span className="h-2.5 overflow-hidden rounded-full bg-primary-tint"><i className="block h-full rounded-full bg-primary" style={{ width: `${percent}%` }} /></span>
                   <b className="text-right tabular-nums">{percent}%</b>
                 </li>
               )

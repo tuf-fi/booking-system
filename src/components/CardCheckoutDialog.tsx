@@ -45,7 +45,7 @@ export function CardCheckoutDialog({ booking, onClose, onPaid }: Props) {
     <Dialog open={booking !== null} onClose={onClose} title="Pay by card" size="sm">
       {booking && (
         <div>
-          <p className="rounded-2xl bg-sky-tint px-4 py-3 text-sm text-sky-ink">
+          <p className="rounded-control bg-tertiary-tint px-4 py-3 text-sm text-tertiary-deep">
             Demo checkout. In the live system this is the secure PayMongo page for cards, GCash, Maya and QR Ph. No real charge is made.
           </p>
           <div className="mt-5 flex items-baseline justify-between">

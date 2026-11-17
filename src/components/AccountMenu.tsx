@@ -5,7 +5,7 @@ import { signOut, type Profile } from '../store/accounts'
 import { Avatar } from './Avatar'
 import { useToast } from './Toast'
 
-const ITEM = 'flex min-h-11 w-full items-center gap-3 px-4 text-left text-[0.875rem] font-bold transition-colors hover:bg-sand focus-visible:bg-sand'
+const ITEM = 'flex min-h-11 w-full items-center gap-3 px-4 text-left text-sm font-bold transition-colors hover:bg-sand focus-visible:bg-sand'
 
 export function AccountMenu({ account }: { account: Profile }) {
   const [open, setOpen] = useState(false)
@@ -50,10 +50,10 @@ export function AccountMenu({ account }: { account: Profile }) {
       </button>
 
       {open && (
-        <div role="menu" aria-label="Account" className="menu-pop absolute right-0 top-[calc(100%+0.75rem)] z-50 w-64 overflow-hidden border border-line bg-surface shadow-lift">
+        <div role="menu" aria-label="Account" className="menu-pop absolute right-0 top-[calc(100%+0.75rem)] z-50 w-64 overflow-hidden rounded-card border border-line bg-surface shadow-lift">
           <div className="border-b border-line px-4 py-3">
-            <p className="truncate text-[0.875rem] font-bold">{account.name}</p>
-            <p className="truncate text-[0.8125rem] text-muted">{account.email}</p>
+            <p className="truncate text-sm font-bold">{account.name}</p>
+            <p className="truncate text-sm text-muted">{account.email}</p>
           </div>
           <Link to="/account/profile" role="menuitem" onClick={() => setOpen(false)} className={ITEM}><UserRound size={16} aria-hidden />View profile</Link>
           <Link to="/account" role="menuitem" onClick={() => setOpen(false)} className={ITEM}><Luggage size={16} aria-hidden />My trips</Link>

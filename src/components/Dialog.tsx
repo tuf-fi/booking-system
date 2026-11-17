@@ -29,7 +29,7 @@ export function Dialog({ open, onClose, title, children, size = 'sm' }: DialogPr
         if (event.target === ref.current) onClose()
       }}
       aria-label={title}
-      className={`m-auto w-[calc(100%-2rem)] ${WIDTHS[size]} max-h-[90vh] overflow-y-auto glass-strong rounded-3xl p-0 text-ink backdrop:bg-ink/40 backdrop:backdrop-blur-sm`}
+      className={`m-auto w-[calc(100%-2rem)] ${WIDTHS[size]} max-h-[90vh] overflow-y-auto glass-strong rounded-panel p-0 text-ink backdrop:bg-ink/40 backdrop:backdrop-blur-sm`}
     >
       {open && (
         <div className="p-6 sm:p-7">

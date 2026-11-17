@@ -8,6 +8,7 @@ import { addDays, formatLong } from '../lib/dates'
 import { peso } from '../lib/money'
 import { BookingError, findBooking, guestCancel, isWithinFreeCancellation } from '../store/api'
 import { useDb } from '../store/db'
+import { SITE } from '../lib/site'
 
 const CANCELLABLE = ['pending_approval', 'pending_payment', 'confirmed']
 
@@ -53,23 +54,23 @@ export function Manage() {
   return (
     <div className="container-page max-w-3xl pb-10 pt-12">
       <h1 className="text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">Find your booking</h1>
-      <p className="mt-2 max-w-xl text-[0.875rem] leading-[1.65] text-muted">Enter the reference from your confirmation text and the mobile number you booked with.</p>
+      <p className="mt-2 max-w-xl text-sm leading-[1.65] text-muted">Enter the reference from your confirmation text and the mobile number you booked with.</p>
 
-      <form onSubmit={lookup} className="mt-8 grid gap-4 border border-line bg-surface p-5 shadow-soft sm:grid-cols-[1fr_1fr_auto] sm:items-end sm:p-6">
+      <form onSubmit={lookup} className="mt-8 grid gap-4 rounded-card border border-line bg-surface p-5 shadow-soft sm:grid-cols-[1fr_1fr_auto] sm:items-end sm:p-6">
         <div>
           <label htmlFor="m-ref" className="label">Reference number</label>
-          <input id="m-ref" className="field field-compact rounded-none uppercase" placeholder="LTW-XXXXX" value={reference} onChange={e => setReference(e.target.value)} required autoComplete="off" />
+          <input id="m-ref" className="field field-compact uppercase" placeholder="LTW-XXXXX" value={reference} onChange={e => setReference(e.target.value)} required autoComplete="off" />
         </div>
         <div>
           <label htmlFor="m-mobile" className="label">Mobile number</label>
-          <input id="m-mobile" className="field field-compact rounded-none" inputMode="tel" placeholder="0917 123 4567" value={mobile} onChange={e => setMobile(e.target.value)} required />
+          <input id="m-mobile" className="field field-compact" inputMode="tel" placeholder="0917 123 4567" value={mobile} onChange={e => setMobile(e.target.value)} required />
         </div>
-        <button type="submit" className="btn btn-primary h-[2.6rem] min-h-0 rounded-none px-6 text-[0.875rem]" disabled={busy}><Search size={16} aria-hidden />{busy && !booking ? 'Looking…' : 'Find booking'}</button>
+        <button type="submit" className="btn btn-primary h-[2.6rem] min-h-0 px-6 text-sm" disabled={busy}><Search size={16} aria-hidden />{busy && !booking ? 'Looking…' : 'Find booking'}</button>
       </form>
 
       {notFound && (
-        <p role="alert" className="mt-4 bg-danger-tint px-4 py-3 text-[0.875rem] text-danger">
-          We could not find a booking with those details. Check both and try again, or text us at 0917 555 0142.
+        <p role="alert" className="mt-4 bg-danger-tint px-4 py-3 text-sm text-danger">
+          We could not find a booking with those details. Check both and try again, or text us at {SITE.phone}.
         </p>
       )}
 
@@ -84,7 +85,7 @@ export function Manage() {
           </div>
           <BookingReceipt booking={booking} room={room} settings={db.settings} />
           {CANCELLABLE.includes(booking.status) && (
-            <div className="mt-6 rounded-3xl border border-line bg-surface p-5">
+            <div className="mt-6 rounded-card border border-line bg-surface p-5">
               <h2 className="text-xl font-bold">Need to cancel?</h2>
               <p className="mt-1 text-sm text-muted">
                 {refundable
@@ -95,7 +96,7 @@ export function Manage() {
             </div>
           )}
           {booking.status === 'cancelled' && booking.cancelReason && (
-            <p className="mt-6 rounded-2xl bg-sand/70 p-4 text-sm text-muted">{booking.cancelReason}.</p>
+            <p className="mt-6 rounded-control bg-sand/70 p-4 text-sm text-muted">{booking.cancelReason}.</p>
           )}
         </div>
       )}

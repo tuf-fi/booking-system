@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Room } from '../types'
+import { EmptyState } from './EmptyState'
 import { RoomCard } from './RoomCard'
 
 const EDGE_TOLERANCE = 4
@@ -37,7 +38,16 @@ export function RoomCarousel({ rooms, heading }: { rooms: Room[]; heading: React
     track.scrollBy({ left: direction * (first.offsetWidth + 16) * 2, behavior: reduced ? 'auto' : 'smooth' })
   }
 
-  const arrow = 'grid size-11 place-items-center rounded-none border border-line bg-surface shadow-soft transition-all hover:bg-ink hover:text-white disabled:pointer-events-none disabled:opacity-35'
+  const arrow = 'grid size-11 place-items-center rounded-full border border-line bg-surface shadow-soft transition-all hover:bg-secondary hover:text-white disabled:pointer-events-none disabled:opacity-35'
+
+  if (rooms.length === 0) {
+    return (
+      <div>
+        {heading}
+        <EmptyState className="mt-8 rounded-card border border-line bg-surface" title="No rooms are open for booking" description="Please check back soon, or send us a message below." />
+      </div>
+    )
+  }
 
   return (
     <div>

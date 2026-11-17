@@ -45,7 +45,7 @@ function Login() {
         </div>
         {error && <p role="alert" className="mt-3 text-sm text-danger">That email or password is not right.</p>}
         <button type="submit" className="btn btn-primary btn-block mt-6">Sign in</button>
-        <Link to="/" className="mt-4 block text-center text-sm font-semibold text-leaf hover:underline">Back to the guest site</Link>
+        <Link to="/" className="mt-4 block text-center text-sm font-semibold text-primary hover:underline">Back to the guest site</Link>
       </form>
     </div>
   )
@@ -81,7 +81,7 @@ export function AdminLayout() {
           {NAV.map(({ to, label, icon: Icon, end }) => (
             <NavLink key={to} to={to} end={end} className={({ isActive }) => `flex shrink-0 items-center gap-2 border-b-[3px] px-3.5 py-3 text-sm font-semibold transition-colors ${isActive ? 'border-ink text-ink' : 'border-transparent text-muted hover:text-ink'}`}>
               <Icon size={16} />{label}
-              {to === '/admin/bookings' && waiting > 0 && <span className="grid min-w-5 place-items-center rounded-full bg-sun px-1.5 text-xs font-bold text-ink">{waiting}</span>}
+              {to === '/admin/bookings' && waiting > 0 && <span className="chip min-w-5 justify-center bg-accent px-1.5 text-ink">{waiting}</span>}
             </NavLink>
           ))}
         </nav>
@@ -92,7 +92,7 @@ export function AdminLayout() {
         <p className="text-muted">This removes the bookings and changes you made in the demo and puts back the sample data.</p>
         <div className="mt-6 flex justify-end gap-2">
           <button type="button" className="btn btn-ghost" onClick={() => setResetting(false)}>Keep my changes</button>
-          <button type="button" className="btn btn-dark" onClick={() => { resetDemo(); setResetting(false); toast('Demo data reset.') }}>Reset demo</button>
+          <button type="button" className="btn btn-secondary" onClick={() => { resetDemo(); setResetting(false); toast('Demo data reset.') }}>Reset demo</button>
         </div>
       </Dialog>
     </div>

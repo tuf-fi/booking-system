@@ -47,14 +47,14 @@ export function GoogleButton({ label, onProfile, onError, disabled }: GoogleButt
 
   return (
     <>
-      <button type="button" onClick={start} disabled={disabled || busy} className="btn btn-ghost btn-block rounded-none bg-surface">
+      <button type="button" onClick={start} disabled={disabled || busy} className="btn btn-ghost btn-block bg-surface">
         <GoogleMark />
         {busy ? 'Opening Google…' : label}
       </button>
 
       <Dialog open={chooser} onClose={() => setChooser(false)} title="Choose a Google account">
-        <p className="text-[0.875rem] leading-[1.65] text-muted">Demo accounts. Real Google sign-in turns on when a Google client ID is set in <b>VITE_GOOGLE_CLIENT_ID</b>.</p>
-        <ul className="mt-4 divide-y divide-line border border-line bg-surface">
+        <p className="text-sm leading-[1.65] text-muted">Demo accounts. Real Google sign-in turns on when a Google client ID is set in <b>VITE_GOOGLE_CLIENT_ID</b>.</p>
+        <ul className="mt-4 divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
           {DEMO_GOOGLE_ACCOUNTS.map(account => (
             <li key={account.email}>
               <button
@@ -65,10 +65,10 @@ export function GoogleButton({ label, onProfile, onError, disabled }: GoogleButt
                 }}
                 className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-sand"
               >
-                <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-full bg-leaf-tint text-sm font-extrabold text-leaf-deep">{account.name.slice(0, 1)}</span>
+                <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-full bg-primary-tint text-sm font-extrabold text-primary-deep">{account.name.slice(0, 1)}</span>
                 <span>
-                  <span className="block text-[0.9375rem] font-bold">{account.name}</span>
-                  <span className="block text-[0.8125rem] text-muted">{account.email}</span>
+                  <span className="block text-base font-bold">{account.name}</span>
+                  <span className="block text-sm text-muted">{account.email}</span>
                 </span>
               </button>
             </li>

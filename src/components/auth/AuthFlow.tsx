@@ -158,9 +158,9 @@ export function AuthFlow({ initialMode, initialEmail, notice, embedded = false, 
   return (
     <div>
       <Heading className="text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">{heading}</Heading>
-      {intro && <p className="mt-2 text-[0.875rem] leading-[1.65] text-muted">{intro}</p>}
+      {intro && <p className="mt-2 text-sm leading-[1.65] text-muted">{intro}</p>}
 
-      {message && <p role="status" className="mt-5 bg-leaf-tint px-4 py-3 text-[0.875rem] font-bold text-leaf-deep">{message}</p>}
+      {message && <p role="status" className="mt-5 rounded-control bg-primary-tint px-4 py-3 text-sm font-bold text-primary-deep">{message}</p>}
 
       <div className="mt-6">
         {step === 'verify' && challenge && (
@@ -180,8 +180,8 @@ export function AuthFlow({ initialMode, initialEmail, notice, embedded = false, 
         {step === 'newpassword' && (
           <form onSubmit={submitNewPassword} noValidate className="space-y-5">
             <PasswordField id="auth-new" label="New password" value={password} onChange={setPassword} autoComplete="new-password" error={errors.password} hint="At least 8 characters, with a letter and a number." />
-            {formError && <p role="alert" className="text-[0.875rem] font-bold text-danger">{formError}</p>}
-            <button type="submit" disabled={busy} className="btn btn-primary btn-block rounded-none">{busy ? 'Saving…' : 'Save new password'}</button>
+            {formError && <p role="alert" className="text-sm font-bold text-danger">{formError}</p>}
+            <button type="submit" disabled={busy} className="btn btn-primary btn-block">{busy ? 'Saving…' : 'Save new password'}</button>
           </form>
         )}
 
@@ -189,8 +189,8 @@ export function AuthFlow({ initialMode, initialEmail, notice, embedded = false, 
           <form onSubmit={submitSignIn} noValidate className="space-y-5">
             <div>
               <label className="label" htmlFor="auth-email">Email <span aria-hidden className="text-danger">*</span></label>
-              <input id="auth-email" type="email" className="field field-compact rounded-none" autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'auth-email-error' : undefined} />
-              {errors.email && <p id="auth-email-error" className="mt-1.5 text-[0.8125rem] text-danger">{errors.email}</p>}
+              <input id="auth-email" type="email" className="field field-compact" autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'auth-email-error' : undefined} />
+              {errors.email && <p id="auth-email-error" className="mt-1.5 text-sm text-danger">{errors.email}</p>}
             </div>
             <PasswordField
               id="auth-password"
@@ -199,10 +199,10 @@ export function AuthFlow({ initialMode, initialEmail, notice, embedded = false, 
               onChange={setPassword}
               autoComplete="current-password"
               error={errors.password}
-              aside={<button type="button" onClick={() => changeMode('forgot')} className="text-[0.8125rem] font-bold text-leaf hover:underline">Forgot password?</button>}
+              aside={<button type="button" onClick={() => changeMode('forgot')} className="text-sm font-bold text-primary hover:underline">Forgot password?</button>}
             />
-            {formError && <p role="alert" className="text-[0.875rem] font-bold text-danger">{formError}</p>}
-            <button type="submit" disabled={busy} className="btn btn-primary btn-block rounded-none">{busy ? 'Checking…' : 'Sign in'}</button>
+            {formError && <p role="alert" className="text-sm font-bold text-danger">{formError}</p>}
+            <button type="submit" disabled={busy} className="btn btn-primary btn-block">{busy ? 'Checking…' : 'Sign in'}</button>
           </form>
         )}
 
@@ -210,22 +210,22 @@ export function AuthFlow({ initialMode, initialEmail, notice, embedded = false, 
           <form onSubmit={submitSignUp} noValidate className="space-y-5">
             <div>
               <label className="label" htmlFor="auth-name">Full name <span aria-hidden className="text-danger">*</span></label>
-              <input id="auth-name" className="field field-compact rounded-none" autoComplete="name" value={name} onChange={e => setName(e.target.value)} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'auth-name-error' : undefined} />
-              {errors.name && <p id="auth-name-error" className="mt-1.5 text-[0.8125rem] text-danger">{errors.name}</p>}
+              <input id="auth-name" className="field field-compact" autoComplete="name" value={name} onChange={e => setName(e.target.value)} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'auth-name-error' : undefined} />
+              {errors.name && <p id="auth-name-error" className="mt-1.5 text-sm text-danger">{errors.name}</p>}
             </div>
             <div>
               <label className="label" htmlFor="auth-email">Email <span aria-hidden className="text-danger">*</span></label>
-              <input id="auth-email" type="email" className="field field-compact rounded-none" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'auth-email-error' : undefined} />
-              {errors.email && <p id="auth-email-error" className="mt-1.5 text-[0.8125rem] text-danger">{errors.email}</p>}
+              <input id="auth-email" type="email" className="field field-compact" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'auth-email-error' : undefined} />
+              {errors.email && <p id="auth-email-error" className="mt-1.5 text-sm text-danger">{errors.email}</p>}
             </div>
             <div>
               <label className="label" htmlFor="auth-mobile">Mobile number <span aria-hidden className="text-danger">*</span></label>
-              <input id="auth-mobile" className="field field-compact rounded-none" inputMode="tel" autoComplete="tel" placeholder="0917 123 4567" value={mobile} onChange={e => setMobile(e.target.value)} aria-invalid={Boolean(errors.mobile)} aria-describedby="auth-mobile-hint" />
-              <p id="auth-mobile-hint" className={`mt-1.5 text-[0.8125rem] ${errors.mobile ? 'text-danger' : 'text-muted'}`}>{errors.mobile ?? 'We text your booking updates here.'}</p>
+              <input id="auth-mobile" className="field field-compact" inputMode="tel" autoComplete="tel" placeholder="0917 123 4567" value={mobile} onChange={e => setMobile(e.target.value)} aria-invalid={Boolean(errors.mobile)} aria-describedby="auth-mobile-hint" />
+              <p id="auth-mobile-hint" className={`mt-1.5 text-sm ${errors.mobile ? 'text-danger' : 'text-muted'}`}>{errors.mobile ?? 'We text your booking updates here.'}</p>
             </div>
             <PasswordField id="auth-password" label="Password" value={password} onChange={setPassword} autoComplete="new-password" error={errors.password} hint="At least 8 characters, with a letter and a number." />
-            {formError && <p role="alert" className="text-[0.875rem] font-bold text-danger">{formError}</p>}
-            <button type="submit" disabled={busy} className="btn btn-primary btn-block rounded-none">{busy ? 'Creating…' : 'Create account'}</button>
+            {formError && <p role="alert" className="text-sm font-bold text-danger">{formError}</p>}
+            <button type="submit" disabled={busy} className="btn btn-primary btn-block">{busy ? 'Creating…' : 'Create account'}</button>
           </form>
         )}
 
@@ -233,17 +233,17 @@ export function AuthFlow({ initialMode, initialEmail, notice, embedded = false, 
           <form onSubmit={submitForgot} noValidate className="space-y-5">
             <div>
               <label className="label" htmlFor="auth-email">Email <span aria-hidden className="text-danger">*</span></label>
-              <input id="auth-email" type="email" className="field field-compact rounded-none" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'auth-email-error' : undefined} />
-              {errors.email && <p id="auth-email-error" className="mt-1.5 text-[0.8125rem] text-danger">{errors.email}</p>}
+              <input id="auth-email" type="email" className="field field-compact" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'auth-email-error' : undefined} />
+              {errors.email && <p id="auth-email-error" className="mt-1.5 text-sm text-danger">{errors.email}</p>}
             </div>
-            {formError && <p role="alert" className="text-[0.875rem] font-bold text-danger">{formError}</p>}
-            <button type="submit" disabled={busy} className="btn btn-primary btn-block rounded-none">{busy ? 'Sending…' : 'Send code'}</button>
+            {formError && <p role="alert" className="text-sm font-bold text-danger">{formError}</p>}
+            <button type="submit" disabled={busy} className="btn btn-primary btn-block">{busy ? 'Sending…' : 'Send code'}</button>
           </form>
         )}
 
         {step === 'form' && mode !== 'forgot' && (
           <>
-            <div className="my-6 flex items-center gap-3 text-[0.8125rem] text-muted" role="separator">
+            <div className="my-6 flex items-center gap-3 text-sm text-muted" role="separator">
               <span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" />
             </div>
             <GoogleButton label={mode === 'signin' ? 'Continue with Google' : 'Sign up with Google'} onProfile={onGoogle} onError={setFormError} disabled={busy} />
@@ -252,15 +252,15 @@ export function AuthFlow({ initialMode, initialEmail, notice, embedded = false, 
       </div>
 
       {step === 'form' && (
-        <p className="mt-7 text-[0.875rem] text-muted">
+        <p className="mt-7 text-sm text-muted">
           {mode === 'signin' && (
-            <>New here? <button type="button" onClick={() => changeMode('signup', { email: '', notice: null })} className="font-bold text-leaf hover:underline">Create an account</button></>
+            <>New here? <button type="button" onClick={() => changeMode('signup', { email: '', notice: null })} className="font-bold text-primary hover:underline">Create an account</button></>
           )}
           {mode === 'signup' && (
-            <>Already have an account? <button type="button" onClick={() => changeMode('signin')} className="font-bold text-leaf hover:underline">Sign in</button></>
+            <>Already have an account? <button type="button" onClick={() => changeMode('signin')} className="font-bold text-primary hover:underline">Sign in</button></>
           )}
           {mode === 'forgot' && (
-            <>Remembered it? <button type="button" onClick={() => changeMode('signin')} className="font-bold text-leaf hover:underline">Back to sign in</button></>
+            <>Remembered it? <button type="button" onClick={() => changeMode('signin')} className="font-bold text-primary hover:underline">Back to sign in</button></>
           )}
         </p>
       )}

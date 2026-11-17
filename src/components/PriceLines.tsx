@@ -7,10 +7,10 @@ export interface PriceLine {
 }
 
 const TONES = {
-  default: 'text-[0.8125rem]',
+  default: 'text-sm',
   total: 'mt-2 border-t border-line pt-3 text-base font-bold',
-  due: 'text-[0.8125rem] font-bold text-leaf',
-  muted: 'text-[0.8125rem] text-muted'
+  due: 'text-sm font-bold text-primary',
+  muted: 'text-sm text-muted'
 }
 
 export function PriceLines({ lines }: { lines: PriceLine[] }) {

@@ -7,7 +7,7 @@ import { useDb } from '../store/db'
 import { FIELD_LABEL, FIELD_PAD, FIELD_SHELL, SearchSelect, type SelectOption } from './SearchSelect'
 
 const DIVIDER = 'lg:before:absolute lg:before:left-0 lg:before:top-2.5 lg:before:bottom-2.5 lg:before:w-px lg:before:bg-ink/10'
-const DATE_CONTROL = 'block h-6 w-full appearance-none bg-transparent text-[0.8125rem] font-semibold leading-6 text-ink outline-none'
+const DATE_CONTROL = 'block h-6 w-full appearance-none bg-transparent text-base font-semibold leading-6 text-ink outline-none'
 
 function DateField({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -26,6 +26,7 @@ export function SearchBar() {
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
   const [guests, setGuests] = useState(2)
+  const [note, setNote] = useState('')
 
   const onCheckIn = (value: string) => {
     setCheckIn(value)
@@ -36,11 +37,21 @@ export function SearchBar() {
     const next = Number(value)
     setGuests(next)
     const chosen = db.rooms.find(room => room.id === roomId)
-    if (chosen && chosen.sleeps < next) setRoomId('')
+    if (chosen && chosen.sleeps < next) {
+      setRoomId('')
+      setNote(`${chosen.name} sleeps ${chosen.sleeps}, so the room is back to Any room.`)
+    } else {
+      setNote('')
+    }
   }
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
+    if ((checkIn || checkOut) && !(checkIn && checkOut && checkOut > checkIn)) {
+      setNote('Pick both dates, with check-out after check-in, or clear them to search without dates.')
+      return
+    }
+    setNote('')
     const params = new URLSearchParams()
     if (roomId) params.set('room', roomId)
     if (checkIn && checkOut && checkOut > checkIn) {
@@ -62,14 +73,14 @@ export function SearchBar() {
   )
 
   const guestOptions = useMemo<SelectOption[]>(
-    () => Array.from({ length: 6 }, (_, i) => ({ value: String(i + 1), label: `${i + 1} guest${i ? 's' : ''}` })),
-    []
+    () => Array.from({ length: Math.max(1, ...db.rooms.filter(room => room.isActive).map(room => room.sleeps)) }, (_, i) => ({ value: String(i + 1), label: `${i + 1} guest${i ? 's' : ''}` })),
+    [db.rooms]
   )
 
   return (
     <form
       onSubmit={submit}
-      className="glass-strong grid grid-cols-2 gap-1.5 rounded-3xl p-1.5 lg:grid-cols-[1.35fr_1fr_1fr_0.85fr_auto] lg:items-center lg:gap-0 lg:rounded-full lg:py-1.5 lg:pl-2 lg:pr-1.5"
+      className="glass-strong grid grid-cols-2 gap-1.5 rounded-panel lg:rounded-full p-1.5 lg:grid-cols-[1.35fr_1fr_1fr_0.85fr_auto] lg:items-center lg:gap-0 lg:py-1.5 lg:pl-2 lg:pr-1.5"
     >
       <SearchSelect label="Room" value={roomId} options={roomOptions} onChange={setRoomId} className="col-span-2 lg:col-span-1" />
       <DateField label="Check-in">
@@ -84,6 +95,7 @@ export function SearchBar() {
       <button type="submit" className="btn btn-primary col-span-2 mt-0.5 h-11 min-h-0 px-6 text-sm lg:col-span-1 lg:mt-0 lg:ml-1.5">
         <Search size={16} />Search
       </button>
+      <p role="status" className={`col-span-2 px-3 pb-1 text-sm font-semibold text-accent-deep lg:col-span-5 ${note ? '' : 'sr-only'}`}>{note}</p>
     </form>
   )
 }

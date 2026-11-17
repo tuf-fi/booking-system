@@ -28,7 +28,7 @@ export function Auth({ mode }: { mode: AuthMode }) {
   return (
     <div className="grid min-h-screen bg-surface lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
       <main id="main" className="flex flex-col px-6 lg:overflow-y-auto lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden py-8 sm:px-12 lg:px-[clamp(3rem,8vw,8rem)]">
-        <Link to="/" className="inline-flex min-h-11 w-fit items-center gap-2 text-[0.9375rem] font-bold text-ink transition-colors hover:text-leaf">
+        <Link to="/" className="inline-flex min-h-11 w-fit items-center gap-2 text-base font-bold text-ink transition-colors hover:text-primary">
           <ArrowLeft size={16} aria-hidden />Back to the site
         </Link>
 
@@ -44,7 +44,7 @@ export function Auth({ mode }: { mode: AuthMode }) {
         </div>
       </main>
 
-      <aside className="relative isolate hidden overflow-hidden bg-ink lg:block">
+      <aside className="relative isolate hidden overflow-hidden bg-secondary lg:block">
         <Photo name="mayon-sunrise" size="full" priority sizes="50vw" className="absolute inset-0 -z-20 size-full object-cover" />
         <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/90 via-ink/25 to-ink/35" />
 
@@ -56,7 +56,7 @@ export function Auth({ mode }: { mode: AuthMode }) {
         <div className="absolute inset-x-8 bottom-10 max-w-md text-white">
           <p className="text-sm text-white/85">Legazpi City, Albay</p>
           <p className="mt-1 text-3xl font-extrabold leading-tight">Wake up to Mayon</p>
-          <p className="mt-3 text-[0.9375rem] text-white/90">Rooms from {peso(lowestRate)} a night. Book direct and skip the booking-site fees.</p>
+          <p className="mt-3 text-base text-white/90">Rooms from {peso(lowestRate)} a night. Book direct and skip the booking-site fees.</p>
         </div>
       </aside>
     </div>

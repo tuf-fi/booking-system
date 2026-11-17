@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Download, Search } from 'lucide-react'
 import { BookingRow } from '../../components/admin/BookingRow'
+import { EmptyState } from '../../components/EmptyState'
+import { PageHeader } from '../../components/PageHeader'
 import { statusLabel } from '../../components/StatusChip'
 import { downloadCsv, FILTERS, matchesFilter, sortBookings, type BookingFilter } from '../../lib/reports'
 import { useDb } from '../../store/db'
@@ -32,13 +34,11 @@ export function Bookings() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-extrabold">Bookings</h1>
-          <p className="mt-1 text-muted">Approve payments, check guests in and out, and keep track of balances.</p>
-        </div>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={exportCsv}><Download size={14} />Export CSV</button>
-      </div>
+      <PageHeader
+        title="Bookings"
+        description="Approve payments, check guests in and out, and keep track of balances."
+        actions={<button type="button" className="btn btn-ghost btn-sm" onClick={exportCsv}><Download size={14} />Export CSV</button>}
+      />
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <div role="tablist" aria-label="Filter bookings" className="flex flex-wrap gap-2">
@@ -49,7 +49,7 @@ export function Bookings() {
               role="tab"
               aria-selected={filter === f.id}
               onClick={() => setParams(f.id === 'all' ? {} : { filter: f.id })}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${filter === f.id ? 'border-ink bg-ink text-white' : 'border-line bg-surface hover:bg-sand'}`}
+              className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${filter === f.id ? 'border-ink bg-secondary text-white' : 'border-line bg-surface hover:bg-sand'}`}
             >
               {f.label} <span className={filter === f.id ? 'text-white/70' : 'text-muted'}>{counts[f.id]}</span>
             </button>
@@ -66,7 +66,7 @@ export function Bookings() {
         {list.length ? (
           <ul className="divide-y divide-line">{list.map(b => <BookingRow key={b.reference} booking={b} />)}</ul>
         ) : (
-          <p className="p-12 text-center text-muted">No bookings here yet.</p>
+          <EmptyState title="No bookings here yet" className="p-12" />
         )}
       </div>
     </div>

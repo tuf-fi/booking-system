@@ -53,7 +53,7 @@ export function CodeStep({ info, onVerified, onBack, backLabel }: CodeStepProps)
 
   return (
     <form onSubmit={submit} noValidate className="space-y-4">
-      <p className="text-[0.875rem] leading-[1.65] text-muted">
+      <p className="text-sm leading-[1.65] text-muted">
         Enter the 6-digit code we sent to <b className="text-ink">{current.email}</b>.
       </p>
 
@@ -61,7 +61,7 @@ export function CodeStep({ info, onVerified, onBack, backLabel }: CodeStepProps)
         <label className="label" htmlFor="auth-code">Verification code</label>
         <input
           id="auth-code"
-          className="field field-compact rounded-none font-display text-lg font-bold tabular-nums tracking-[0.35em]"
+          className="field field-compact font-display text-lg font-bold tabular-nums tracking-[0.35em]"
           inputMode="numeric"
           autoComplete="one-time-code"
           maxLength={6}
@@ -71,8 +71,8 @@ export function CodeStep({ info, onVerified, onBack, backLabel }: CodeStepProps)
           aria-invalid={Boolean(error)}
           aria-describedby={error ? 'auth-code-error' : 'auth-code-demo'}
         />
-        {error && <p id="auth-code-error" role="alert" className="mt-1.5 text-[0.8125rem] text-danger">{error}</p>}
-        <p id="auth-code-demo" className="mt-2 text-[0.8125rem] text-sky-ink">
+        {error && <p id="auth-code-error" role="alert" className="mt-1.5 text-sm text-danger">{error}</p>}
+        <p id="auth-code-demo" className="mt-2 text-sm text-tertiary-deep">
           Demo: no email is sent.{' '}
           {demoCode ? (
             <>
@@ -85,11 +85,11 @@ export function CodeStep({ info, onVerified, onBack, backLabel }: CodeStepProps)
         </p>
       </div>
 
-      <button type="submit" disabled={busy} className="btn btn-primary btn-block rounded-none">{busy ? 'Checking…' : 'Verify and continue'}</button>
+      <button type="submit" disabled={busy} className="btn btn-primary btn-block">{busy ? 'Checking…' : 'Verify and continue'}</button>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-[0.8125rem]">
-        <button type="button" onClick={onBack} className="inline-flex min-h-10 items-center gap-1.5 font-bold text-ink hover:text-leaf"><ArrowLeft size={14} aria-hidden />{backLabel}</button>
-        <button type="button" onClick={resend} disabled={secondsLeft > 0} className="min-h-10 font-bold text-leaf hover:underline disabled:cursor-not-allowed disabled:text-muted disabled:no-underline">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+        <button type="button" onClick={onBack} className="inline-flex min-h-10 items-center gap-1.5 font-bold text-ink hover:text-primary"><ArrowLeft size={14} aria-hidden />{backLabel}</button>
+        <button type="button" onClick={resend} disabled={secondsLeft > 0} className="min-h-10 font-bold text-primary hover:underline disabled:cursor-not-allowed disabled:text-muted disabled:no-underline">
           {secondsLeft > 0 ? `Send a new code in ${secondsLeft}s` : 'Send a new code'}
         </button>
       </div>

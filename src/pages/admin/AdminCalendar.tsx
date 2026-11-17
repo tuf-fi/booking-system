@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Booking } from '../../types'
 import { BookingActions } from '../../components/admin/BookingActions'
+import { PageHeader } from '../../components/PageHeader'
 import { Dialog } from '../../components/Dialog'
 import { StatusChip } from '../../components/StatusChip'
 import { useToast } from '../../components/Toast'
@@ -31,18 +32,18 @@ export function AdminCalendar() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-extrabold">Availability</h1>
-          <p className="mt-1 max-w-xl text-muted">Click an open date to block it, for repairs or a walk-in guest. Click a blocked date to open it again.</p>
-        </div>
-        <div>
-          <label htmlFor="cal-room" className="label">Room</label>
-          <select id="cal-room" className="field min-w-52" value={room.id} onChange={e => setRoomId(e.target.value)}>
-            {db.rooms.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-          </select>
-        </div>
-      </div>
+      <PageHeader
+        title="Availability"
+        description="Click an open date to block it, for repairs or a walk-in guest. Click a blocked date to open it again."
+        actions={
+          <div>
+            <label htmlFor="cal-room" className="label">Room</label>
+            <select id="cal-room" className="field min-w-52" value={room.id} onChange={e => setRoomId(e.target.value)}>
+              {db.rooms.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+            </select>
+          </div>
+        }
+      />
 
       <div className="card mt-6 p-4 sm:p-6">
         <div className="mb-4 flex items-center justify-between">
@@ -60,7 +61,7 @@ export function AdminCalendar() {
             const blocked = isBlocked(db, room.id, night)
             const past = night < now
             const tone = booking
-              ? booking.status === 'pending_approval' || booking.status === 'pending_payment' ? 'bg-sun-tint text-sun-ink' : 'bg-leaf-tint text-leaf-deep'
+              ? booking.status === 'pending_approval' || booking.status === 'pending_payment' ? 'bg-accent-tint text-accent-deep' : 'bg-primary-tint text-primary-deep'
               : blocked
                 ? 'bg-danger-tint text-danger'
                 : past
@@ -74,18 +75,18 @@ export function AdminCalendar() {
                 disabled={past && !booking}
                 onClick={() => click(night, booking, blocked)}
                 aria-label={`${formatDay(night)}: ${booking ? `booked by ${booking.guestName}` : blocked ? 'blocked' : 'open'}`}
-                className={`relative flex min-h-16 flex-col justify-between rounded-xl p-2 text-left transition-colors sm:min-h-20 sm:p-2.5 ${tone}`}
+                className={`relative flex min-h-16 flex-col justify-between rounded-control p-2 text-left transition-colors sm:min-h-20 sm:p-2.5 ${tone}`}
               >
                 <span className="font-display text-base font-bold leading-none sm:text-lg">{parseKey(night).getUTCDate()}</span>
-                <span className="truncate text-[0.65rem] font-semibold sm:text-xs">{caption}</span>
-                {night === now && <span className="absolute right-2 top-2 size-1.5 rounded-full bg-leaf" aria-hidden />}
+                <span className="truncate text-xs font-semibold sm:text-xs">{caption}</span>
+                {night === now && <span className="absolute right-2 top-2 size-1.5 rounded-full bg-primary" aria-hidden />}
               </button>
             )
           })}
         </div>
         <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted">
-          <span className="flex items-center gap-2"><i className="size-4 rounded-md bg-leaf-tint" />Confirmed booking</span>
-          <span className="flex items-center gap-2"><i className="size-4 rounded-md bg-sun-tint" />Waiting for approval or payment</span>
+          <span className="flex items-center gap-2"><i className="size-4 rounded-md bg-primary-tint" />Confirmed booking</span>
+          <span className="flex items-center gap-2"><i className="size-4 rounded-md bg-accent-tint" />Waiting for approval or payment</span>
           <span className="flex items-center gap-2"><i className="size-4 rounded-md bg-danger-tint" />Blocked by owner</span>
         </div>
       </div>

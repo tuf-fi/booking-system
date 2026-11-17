@@ -28,7 +28,7 @@ export function ContactForm() {
 
   if (sent) {
     return (
-      <div role="status" className="grid min-h-[22rem] place-content-center justify-items-start gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-8 sm:p-10">
+      <div role="status" className="grid min-h-[22rem] place-content-center justify-items-start gap-4 rounded-card border border-white/10 bg-white/[0.04] p-8 sm:p-10">
         <span className="grid size-12 place-items-center rounded-full bg-white text-ink"><Check aria-hidden size={22} /></span>
         <h3 className="text-2xl font-extrabold leading-tight">Message sent</h3>
         <p className="max-w-sm leading-relaxed text-white/70">Thanks for writing. For anything urgent, call us on 0917 555 0142.</p>
@@ -38,7 +38,7 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 sm:p-10">
+    <form onSubmit={onSubmit} className="rounded-card border border-white/10 bg-white/[0.04] p-6 sm:p-10">
       <div className="grid gap-x-8 gap-y-7 sm:grid-cols-2">
         <label className="block">
           <span className={labelClass}>Name</span>
@@ -57,7 +57,7 @@ export function ContactForm() {
           <textarea name="message" required rows={4} placeholder="Tell us about your stay" className={`${inputClass} resize-none`} />
         </label>
       </div>
-      <button type="submit" className="group btn mt-9 w-full bg-white py-4 text-ink transition-colors hover:bg-sun">
+      <button type="submit" className="group btn mt-9 w-full bg-white py-4 text-ink transition-colors hover:bg-accent">
         Send message
         <ArrowRight aria-hidden size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
       </button>
