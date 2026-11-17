@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { CheckCircle2, Clock, Copy, MessageSquareText, XCircle } from 'lucide-react'
+import { Check, CheckCircle2, Clock, Copy, MessageSquareText, XCircle } from 'lucide-react'
 import { BookingReceipt } from '../components/BookingReceipt'
 import { CardCheckoutDialog } from '../components/CardCheckoutDialog'
 import { useToast } from '../components/Toast'
@@ -15,6 +15,7 @@ export function Confirmation() {
   const toast = useToast()
   const navigate = useNavigate()
   const [paying, setPaying] = useState(false)
+  const [copied, setCopied] = useState(false)
   const [now, setNow] = useState(Date.now())
   const booking = db.bookings.find(b => b.reference === reference)
   const room = booking && db.rooms.find(r => r.id === booking.roomId)
@@ -40,7 +41,8 @@ export function Confirmation() {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(booking.reference)
-      toast('Reference copied.')
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
     } catch {
       toast(`Your reference is ${booking.reference}.`)
     }
@@ -50,7 +52,7 @@ export function Confirmation() {
     switch (booking.status) {
       case 'confirmed':
       case 'checked_in':
-        return { Icon: CheckCircle2, tone: 'text-primary', title: 'Booking confirmed', text: `We received your down payment of ${peso(booking.amountPaid)}. A confirmation text is on its way to your phone.` }
+        return { Icon: CheckCircle2, tone: 'text-primary', title: 'Booking confirmed', text: <>We received your down payment of <b className="font-bold text-ink">{peso(booking.amountPaid)}</b>. A confirmation text is on its way to your phone.</> }
       case 'pending_approval':
         return { Icon: Clock, tone: 'text-accent-deep', title: 'Booking request sent', text: 'Your dates are on hold. The owner will check your GCash payment and text you once it is approved, usually within a few hours.' }
       case 'pending_payment':
@@ -74,12 +76,12 @@ export function Confirmation() {
         <p className="mx-auto mt-3 max-w-md text-pretty text-base leading-[1.7] text-muted">{view.text}</p>
       </div>
 
-      <div className="mt-10 flex items-center justify-between gap-4 rounded-card border border-ink/15 bg-surface px-5 py-4 sm:px-6">
+      <div className="mt-10 flex items-end justify-between gap-4 pb-5">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted">Booking reference</p>
-          <p className="mt-0.5 font-display text-2xl font-extrabold tracking-wide sm:text-3xl">{booking.reference}</p>
+          <p className="text-sm text-muted">Booking reference</p>
+          <p className="mt-1 font-display text-3xl font-extrabold leading-none tracking-wide sm:text-4xl">{booking.reference}</p>
         </div>
-        <button type="button" onClick={copy} className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm font-bold text-ink transition-colors hover:text-primary"><Copy size={15} aria-hidden />Copy</button>
+        <button type="button" onClick={copy} className="btn btn-ghost btn-sm min-h-9 px-3.5">{copied ? <Check size={14} aria-hidden /> : <Copy size={14} aria-hidden />}<span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span></button>
       </div>
 
       {booking.status === 'pending_payment' && (
@@ -89,7 +91,7 @@ export function Confirmation() {
         </div>
       )}
 
-      <div className="mt-3"><BookingReceipt booking={booking} room={room} settings={db.settings} /></div>
+      <div><BookingReceipt booking={booking} room={room} settings={db.settings} /></div>
 
       <div className="mt-6 flex items-start gap-3 text-sm leading-[1.65] text-muted">
         <MessageSquareText size={16} className="mt-0.5 shrink-0 text-primary" aria-hidden />

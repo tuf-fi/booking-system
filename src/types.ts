@@ -45,6 +45,12 @@ export interface Settings {
   cancellationDays: number
   checkInTime: string
   checkOutTime: string
+  innName?: string
+  address?: string
+  phone?: string
+  email?: string
+  houseRules?: string[]
+  policyNote?: string
 }
 
 export type BookingStatus =
@@ -68,6 +74,7 @@ export interface Booking {
   guestMobile: string
   guestEmail: string
   guests: number
+  otherGuests?: string[]
   checkIn: DateKey
   checkOut: DateKey
   nights: number
@@ -100,6 +107,9 @@ export interface Db {
   settings: Settings
   bookings: Booking[]
   blocked: Record<string, DateKey[]>
+  blockedReasons?: Record<string, string>
+  uploads?: Record<string, string>
+  housekeeping?: Record<string, boolean>
   smsLogs: SmsLog[]
   sequence: number
 }

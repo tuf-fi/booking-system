@@ -8,7 +8,7 @@ interface AccountCardProps {
 
 export function AccountCard({ icon: Icon, title, children }: AccountCardProps) {
   return (
-    <section className="rounded-card bg-surface p-5 shadow-soft sm:p-6">
+    <section className="glass glass-data p-5 sm:p-6">
       <h3 className="flex items-center gap-2 text-base font-bold">
         <Icon size={16} className="text-primary" aria-hidden />
         {title}

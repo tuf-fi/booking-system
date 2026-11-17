@@ -16,7 +16,7 @@ export function Saved() {
       <p className="mt-1 text-sm text-muted">Rooms you hearted, with the price per night.</p>
 
       {rooms.length === 0 ? (
-        <div className="mt-6 grid overflow-hidden rounded-card border border-line bg-surface sm:grid-cols-[minmax(0,16rem)_1fr]">
+        <div className="mt-6 grid glass glass-data overflow-hidden sm:grid-cols-[minmax(0,16rem)_1fr]">
           <Photo name="roof-deck" sizes="256px" className="h-40 w-full object-cover sm:h-full" />
           <EmptyState
             className="text-left sm:p-8"

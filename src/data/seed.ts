@@ -136,7 +136,13 @@ const seedStays: SeedStay[] = [
   [80, 'twin', 2, 'confirmed', 'paymongo'],
   [85, 'deluxe', 2, 'pending_approval', 'gcash_manual'],
   [90, 'triple', 3, 'confirmed', 'gcash_manual'],
-  [95, 'family', 2, 'confirmed', 'paymongo']
+  [95, 'family', 2, 'confirmed', 'paymongo'],
+  [-3, 'twin', 3, 'checked_in', 'gcash_manual'],
+  [-2, 'single', 2, 'checked_in', 'paymongo'],
+  [0, 'single', 2, 'confirmed', 'gcash_manual'],
+  [0, 'deluxe', 2, 'confirmed', 'paymongo'],
+  [-3, 'triple', 3, 'checked_in', 'gcash_manual'],
+  [1, 'twin', 2, 'confirmed', 'gcash_manual']
 ]
 
 const mobileFor = (index: number) => `09${17 + (index % 8)}${String(1000000 + ((index * 7919) % 8999999)).slice(0, 7)}`

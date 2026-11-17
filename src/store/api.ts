@@ -25,6 +25,7 @@ export interface CreateBookingInput {
   guestName: string
   guestMobile: string
   guests: number
+  otherGuests?: string[]
   method: Extract<PaymentMethod, 'gcash_manual' | 'paymongo'>
   proof: string | null
 }
@@ -91,6 +92,7 @@ export const createBooking = async (input: CreateBookingInput): Promise<Booking>
     guestEmail: account.email,
     userId: account.id,
     guests: input.guests,
+    otherGuests: (input.otherGuests ?? []).map(name => name.trim()).filter(Boolean).slice(0, Math.max(0, input.guests - 1)),
     checkIn: input.checkIn,
     checkOut: input.checkOut,
     nights: quote.nights,
@@ -182,12 +184,18 @@ export const guestCancel = async (reference: string): Promise<Booking> => {
   return requireBooking(getDb(), reference)
 }
 
-export const setBlockedNight = (roomId: string, night: DateKey, blocked: boolean) => {
+export const setBlockedNight = (roomId: string, night: DateKey, blocked: boolean, reason?: string) => {
   const db = getDb()
   const current = new Set(db.blocked[roomId] ?? [])
-  if (blocked) current.add(night)
-  else current.delete(night)
-  commit({ ...db, blocked: { ...db.blocked, [roomId]: [...current].sort() } })
+  const reasons = { ...(db.blockedReasons ?? {}) }
+  if (blocked) {
+    current.add(night)
+    if (reason?.trim()) reasons[`${roomId}:${night}`] = reason.trim()
+  } else {
+    current.delete(night)
+    delete reasons[`${roomId}:${night}`]
+  }
+  commit({ ...db, blocked: { ...db.blocked, [roomId]: [...current].sort() }, blockedReasons: reasons })
 }
 
 export const blockRange = (roomId: string, checkIn: DateKey, checkOut: DateKey) => {
@@ -198,6 +206,34 @@ export const blockRange = (roomId: string, checkIn: DateKey, checkOut: DateKey) 
 }
 
 export const updateRooms = (rooms: Room[]) => commit({ ...getDb(), rooms })
+
+export const addUpload = (dataUrl: string) => {
+  const db = getDb()
+  const id = Math.random().toString(36).slice(2, 10)
+  commit({ ...db, uploads: { ...(db.uploads ?? {}), [id]: dataUrl } })
+  return `upload:${id}`
+}
+
+export const saveRoom = (room: Room) => {
+  const db = getDb()
+  const exists = db.rooms.some(candidate => candidate.id === room.id)
+  commit({ ...db, rooms: exists ? db.rooms.map(candidate => (candidate.id === room.id ? room : candidate)) : [...db.rooms, room] })
+}
+
+export const roomHasBookings = (roomId: string) => getDb().bookings.some(booking => booking.roomId === roomId)
+
+export const deleteRoom = (roomId: string) => {
+  const db = getDb()
+  if (roomHasBookings(roomId)) throw new BookingError('This room has bookings, so it can only be closed, not deleted.')
+  const blocked = { ...db.blocked }
+  delete blocked[roomId]
+  commit({ ...db, rooms: db.rooms.filter(room => room.id !== roomId), blocked })
+}
+
+export const setHousekeepingDone = (key: string, done: boolean) => {
+  const db = getDb()
+  commit({ ...db, housekeeping: { ...(db.housekeeping ?? {}), [key]: done } })
+}
 
 export const updateSettings = (settings: Settings) => commit({ ...getDb(), settings })
 

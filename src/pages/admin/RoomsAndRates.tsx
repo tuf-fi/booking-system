@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { ImageIcon } from 'lucide-react'
 import type { Room, Settings } from '../../types'
+import { LABEL, INPUT, NumberField, PesoField, Switch } from '../../components/admin/fields'
 import { Photo } from '../../components/Photo'
 import { PageHeader } from '../../components/PageHeader'
 import { useToast } from '../../components/Toast'
@@ -71,74 +72,60 @@ export function RoomsAndRates() {
 
   return (
     <form onSubmit={save}>
-      <PageHeader title="Rooms and rates" description="Guests see new rates as soon as you save. Existing bookings keep the price they booked at." />
+      <PageHeader title="Rates and fees" description="Guests see new rates as soon as you save. Existing bookings keep the price they booked at." />
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-start">
-        <section className="card divide-y divide-line">
+      <div className="mt-6 grid gap-5 lg:grid-cols-[1.6fr_1fr] lg:items-start">
+        <section className="glass glass-data divide-y divide-ink/10" aria-label="Rooms">
           {db.rooms.map(room => {
             const draft = rooms.find(r => r.id === room.id)!
-            const photo = photos[room.photo]
+            const photo = photos[room.photo] ?? { isStock: false }
             return (
-              <div key={room.id} className="grid gap-4 p-5 sm:grid-cols-[7rem_1fr]">
-                <div className="relative">
-                  <Photo name={room.photo} sizes="112px" className="aspect-[4/3] w-full rounded-control object-cover" />
+              <div key={room.id} className="p-4 sm:p-5">
+                <div className="flex items-center gap-4">
+                  <Photo name={room.photo} sizes="80px" className="size-16 shrink-0 rounded-control object-cover" />
+                  <div className="min-w-0 flex-1">
+                    <h2 className="truncate text-base font-bold leading-tight">{room.name}</h2>
+                    <p className="mt-0.5 truncate text-xs text-muted">Sleeps {room.sleeps} · {room.beds}</p>
+                    {photo.isStock && <p className="mt-1 flex items-center gap-1 text-xs font-medium text-accent-deep"><ImageIcon size={12} aria-hidden />Stock photo</p>}
+                  </div>
+                  <label className="flex shrink-0 cursor-pointer items-center gap-2.5 text-xs font-semibold">
+                    <span className={draft.isActive ? 'text-primary-deep' : 'text-muted'}>{draft.isActive ? 'Open' : 'Closed'}</span>
+                    <Switch label={`${room.name} open for booking`} checked={draft.isActive} onChange={value => patchRoom(room.id, { isActive: value })} />
+                  </label>
                 </div>
-                <div>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <h2 className="text-xl font-bold">{room.name}</h2>
-                      <p className="text-sm text-muted">Sleeps {room.sleeps}, {room.beds}</p>
-                    </div>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
-                      <input type="checkbox" className="size-4 accent-primary" checked={draft.isActive} onChange={e => patchRoom(room.id, { isActive: e.target.checked })} />
-                      Open for booking
-                    </label>
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="label" htmlFor={`b-${room.id}`}>Per night (₱)</label>
-                      <input id={`b-${room.id}`} type="number" min="0" inputMode="numeric" className="field" value={draft.base} onChange={e => patchRoom(room.id, { base: e.target.value })} />
-                    </div>
-                    <div>
-                      <label className="label" htmlFor={`w-${room.id}`}>Weekend extra (₱)</label>
-                      <input id={`w-${room.id}`} type="number" min="0" inputMode="numeric" className="field" value={draft.weekend} onChange={e => patchRoom(room.id, { weekend: e.target.value })} />
-                    </div>
-                  </div>
-                  {photo.isStock && (
-                    <p className="chip mt-3 bg-accent-tint text-accent-deep"><ImageIcon size={11} />Stock photo. Replace with your own photo.</p>
-                  )}
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <PesoField id={`b-${room.id}`} label="Per night" value={draft.base} onChange={value => patchRoom(room.id, { base: value })} />
+                  <PesoField id={`w-${room.id}`} label="Weekend extra" value={draft.weekend} onChange={value => patchRoom(room.id, { weekend: value })} />
                 </div>
               </div>
             )
           })}
         </section>
 
-        <section className="card p-6 lg:sticky lg:top-6">
-          <h2 className="text-2xl font-bold">Fees and payments</h2>
-          <div className="mt-5 space-y-4">
-            <div>
-              <label className="label" htmlFor="s-clean">Cleaning fee per stay (₱)</label>
-              <input id="s-clean" type="number" min="0" className="field" value={settings.cleaning} onChange={e => setSettings({ ...settings, cleaning: e.target.value })} />
+        <section className="glass glass-data p-5 lg:sticky lg:top-6" aria-label="Fees and payments">
+          <h2 className="text-base font-bold">Fees and payments</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <PesoField id="s-clean" label="Cleaning fee" value={settings.cleaning} onChange={value => setSettings({ ...settings, cleaning: value })} />
+            <NumberField id="s-down" label="Down payment" suffix="%" max={100} value={settings.down} onChange={value => setSettings({ ...settings, down: value })} />
+            <div className="col-span-2">
+              <NumberField id="s-days" label="Free cancellation until" suffix="days before" value={settings.cancellationDays} onChange={value => setSettings({ ...settings, cancellationDays: value })} />
             </div>
-            <div>
-              <label className="label" htmlFor="s-down">Down payment to confirm a booking (%)</label>
-              <input id="s-down" type="number" min="0" max="100" className="field" value={settings.down} onChange={e => setSettings({ ...settings, down: e.target.value })} />
-            </div>
-            <div>
-              <label className="label" htmlFor="s-days">Free cancellation until (days before check-in)</label>
-              <input id="s-days" type="number" min="0" className="field" value={settings.cancellationDays} onChange={e => setSettings({ ...settings, cancellationDays: e.target.value })} />
-            </div>
-            <div>
-              <label className="label" htmlFor="s-gcash">GCash number shown to guests</label>
-              <input id="s-gcash" className="field" value={settings.gcashNumber} onChange={e => setSettings({ ...settings, gcashNumber: e.target.value })} />
-            </div>
-            <div>
-              <label className="label" htmlFor="s-gname">GCash account name</label>
-              <input id="s-gname" className="field" value={settings.gcashName} onChange={e => setSettings({ ...settings, gcashName: e.target.value })} />
+          </div>
+          <div className="mt-5 border-t border-ink/10 pt-5">
+            <h3 className="text-sm font-bold">GCash payments</h3>
+            <div className="mt-3 space-y-3">
+              <div>
+                <label className={LABEL} htmlFor="s-gcash">Number shown to guests</label>
+                <input id="s-gcash" className={INPUT} value={settings.gcashNumber} onChange={e => setSettings({ ...settings, gcashNumber: e.target.value })} />
+              </div>
+              <div>
+                <label className={LABEL} htmlFor="s-gname">Account name</label>
+                <input id="s-gname" className={INPUT} value={settings.gcashName} onChange={e => setSettings({ ...settings, gcashName: e.target.value })} />
+              </div>
             </div>
           </div>
           {error && <p role="alert" className="mt-4 text-sm font-semibold text-danger">{error}</p>}
-          <button type="submit" className="btn btn-primary btn-block mt-6">Save changes</button>
+          <button type="submit" className="btn btn-primary btn-block mt-5 h-10 min-h-0 text-sm">Save changes</button>
         </section>
       </div>
     </form>

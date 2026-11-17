@@ -26,8 +26,8 @@ export function AccountLayout() {
   if (!account) return <Navigate to={`/signin?next=${encodeURIComponent(location.pathname)}`} replace />
 
   return (
-    <div className="container-page pb-10 pt-8">
-      <header className="flex flex-wrap items-center justify-between gap-4 glass p-5 sm:px-6">
+    <div className="container-page grain pb-10 pt-8">
+      <header className="flex flex-wrap items-center justify-between gap-4 glass glass-data p-5 sm:px-6">
         <div className="flex min-w-0 items-center gap-4">
           <Avatar profile={account} className="size-12 text-base" />
           <div className="min-w-0">

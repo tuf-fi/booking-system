@@ -107,7 +107,7 @@ export function Trips() {
       </div>
 
       {shown.length === 0 ? (
-        <div className="mt-6 grid overflow-hidden rounded-card border border-line bg-surface sm:grid-cols-[minmax(0,16rem)_1fr]">
+        <div className="mt-6 glass glass-data grid overflow-hidden sm:grid-cols-[minmax(0,16rem)_1fr]">
           <Photo name="mayon-dusk" sizes="256px" className="h-40 w-full object-cover sm:h-full" />
           <div className="p-6 sm:p-8">
             <h3 className="text-xl font-bold">Nothing here yet</h3>
@@ -121,7 +121,7 @@ export function Trips() {
             const room = db.rooms.find(r => r.id === booking.roomId)
             if (!room) return null
             return (
-              <li key={booking.reference} className="grid overflow-hidden rounded-card border border-line bg-surface transition-shadow duration-300 hover:shadow-soft sm:grid-cols-[14rem_1fr]">
+              <li key={booking.reference} className="glass glass-data grid overflow-hidden transition-shadow duration-300 hover:shadow-soft sm:grid-cols-[14rem_1fr]">
                 <div className="group relative h-40 overflow-hidden sm:h-full">
                   <Photo name={room.photo} sizes="224px" className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
                   <span className="chip chip-photo absolute left-3 top-3">

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { addDays, today } from '../lib/dates'
 import { isRangeFree } from '../lib/availability'
-import { approveBooking, cancelBooking, completeCardPayment, createBooking, DatesTakenError, findBooking, guestCancel, setBlockedNight, sweepExpired, type CreateBookingInput } from './api'
+import { addUpload, approveBooking, cancelBooking, completeCardPayment, createBooking, DatesTakenError, deleteRoom, findBooking, guestCancel, saveRoom, setBlockedNight, sweepExpired, type CreateBookingInput } from './api'
 import { resetAccounts } from './accounts'
 import { createVerifiedAccount } from './accounts.testing'
 import { commit, getDb, resetDb } from './db'
@@ -117,5 +117,28 @@ describe('manage my booking', () => {
     const near = await createBooking(stay(1, 2, { roomId: 'triple', guests: 2 }))
     const cancelledNear = await guestCancel(near.reference)
     expect(cancelledNear.cancelReason).toMatch(/no refund/)
+  })
+})
+
+describe('room management', () => {
+  it('adds a new room and stores an uploaded photo', () => {
+    const photo = addUpload('data:image/jpeg;base64,AAAA')
+    expect(photo.startsWith('upload:')).toBe(true)
+    expect(getDb().uploads?.[photo.slice(7)]).toBe('data:image/jpeg;base64,AAAA')
+    const base = getDb().rooms[0]
+    saveRoom({ ...base, id: 'garden', name: 'Garden twin', photo, gallery: [] })
+    expect(getDb().rooms.some(room => room.id === 'garden')).toBe(true)
+    saveRoom({ ...base, id: 'garden', name: 'Garden suite', photo, gallery: [] })
+    expect(getDb().rooms.filter(room => room.id === 'garden')).toHaveLength(1)
+    expect(getDb().rooms.find(room => room.id === 'garden')?.name).toBe('Garden suite')
+  })
+
+  it('deletes a room with no bookings and refuses one that has bookings', async () => {
+    const base = getDb().rooms[0]
+    saveRoom({ ...base, id: 'spare', name: 'Spare room' })
+    deleteRoom('spare')
+    expect(getDb().rooms.some(room => room.id === 'spare')).toBe(false)
+    await createBooking(stay(300, 2))
+    expect(() => deleteRoom('twin')).toThrow(/has bookings/)
   })
 })

@@ -10,7 +10,19 @@ export const monthlyRevenue = (db: Db, monthKey: DateKey) =>
     .filter(b => REVENUE_STATUSES.includes(b.status) && b.checkIn.slice(0, 7) === monthKey.slice(0, 7))
     .reduce((sum, b) => sum + b.amountPaid, 0)
 
-export const lastMonths = (count: number, from: DateKey = today()) =>
+export const monthlyBookingCount = (db: Db, monthKey: DateKey) =>
+  db.bookings.filter(b => REVENUE_STATUSES.includes(b.status) && b.checkIn.slice(0, 7) === monthKey.slice(0, 7)).length
+
+export const occupiedDays = (db: Db, roomId: string, monthKey: DateKey) => {
+  const start = monthStart(monthKey)
+  const bookings = db.bookings.filter(b => b.roomId === roomId && OCCUPIED_STATUSES.includes(b.status))
+  return Array.from({ length: daysInMonth(start) }, (_, i) => {
+    const day = addDays(start, i)
+    return bookings.some(b => b.checkIn <= day && day < b.checkOut)
+  })
+}
+
+export const lastMonths =(count: number, from: DateKey = today()) =>
   Array.from({ length: count }, (_, i) => addMonths(monthStart(from), i - (count - 1)))
 
 export const revenueSeries = (db: Db, count = 6) =>

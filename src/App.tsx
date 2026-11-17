@@ -1,6 +1,11 @@
 import { useEffect } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { AdminLayout } from './components/admin/AdminLayout'
+import { Guests } from './pages/admin/Guests'
+import { Housekeeping } from './pages/admin/Housekeeping'
+import { Payments } from './pages/admin/Payments'
+import { Property } from './pages/admin/Property'
+import { Rooms } from './pages/admin/Rooms'
 import { SiteLayout } from './components/SiteLayout'
 import { ToastProvider } from './components/Toast'
 import { AdminCalendar } from './pages/admin/AdminCalendar'
@@ -61,7 +66,12 @@ export default function App() {
             <Route index element={<Dashboard />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="calendar" element={<AdminCalendar />} />
-            <Route path="rooms" element={<RoomsAndRates />} />
+            <Route path="housekeeping" element={<Housekeeping />} />
+            <Route path="guests" element={<Guests />} />
+            <Route path="payments" element={<Payments />} />
+            <Route path="rooms" element={<Rooms />} />
+            <Route path="rates" element={<RoomsAndRates />} />
+            <Route path="property" element={<Property />} />
             <Route path="reports" element={<Reports />} />
           </Route>
         </Routes>

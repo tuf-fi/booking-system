@@ -14,5 +14,5 @@ export const statusLabel = (status: BookingStatus) => STYLES[status].label
 
 export function StatusChip({ status }: { status: BookingStatus }) {
   const { label, className } = STYLES[status]
-  return <span className={`chip ${className}`}>{label}</span>
+  return <span className={`chip ${className}`}><i aria-hidden className="chip-dot" />{label}</span>
 }

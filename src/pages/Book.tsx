@@ -9,9 +9,8 @@ import { Photo } from '../components/Photo'
 import { PriceLines } from '../components/PriceLines'
 import { RoomGallery } from '../components/RoomGallery'
 import { RoomReviews } from '../components/RoomReviews'
-import { StayDates } from '../components/StayDates'
 import { useToast } from '../components/Toast'
-import { today, type DateKey } from '../lib/dates'
+import { formatDay, today, type DateKey } from '../lib/dates'
 import { downscaleImage, plural } from '../lib/format'
 import { isRangeFree } from '../lib/availability'
 import { peso } from '../lib/money'
@@ -26,11 +25,12 @@ interface FormState {
   name: string
   mobile: string
   guests: number
+  others: string[]
 }
 
 const STEPS = ['Room', 'Dates', 'Your details', 'Payment'] as const
 
-type Errors = Partial<Record<'name' | 'mobile' | 'proof' | 'dates', string>>
+type Errors = Partial<Record<'name' | 'mobile' | 'others' | 'proof' | 'dates', string>>
 
 const isDateKey = (value: string | null): value is DateKey => Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value))
 
@@ -46,7 +46,7 @@ export function Book() {
   const [roomId, setRoomId] = useState(initialRoom.id)
   const [checkIn, setCheckIn] = useState<DateKey | null>(null)
   const [checkOut, setCheckOut] = useState<DateKey | null>(null)
-  const [form, setForm] = useState<FormState>({ name: '', mobile: '', guests: Math.min(Number(params.get('guests')) || 2, initialRoom.sleeps) })
+  const [form, setForm] = useState<FormState>({ name: '', mobile: '', guests: Math.min(Number(params.get('guests')) || 2, initialRoom.sleeps), others: [] })
   const [method, setMethod] = useState<Method>('gcash_manual')
   const [proof, setProof] = useState<string | null>(null)
   const [errors, setErrors] = useState<Errors>({})
@@ -109,6 +109,7 @@ export function Book() {
     if (forStep === 2) {
       if (!account) return found
       if (form.name.trim().length < 2) found.name = 'Enter your full name.'
+      if (Array.from({ length: form.guests - 1 }, (_, i) => form.others[i] ?? '').some(name => name.trim().length < 2)) found.others = 'Enter the name of every guest staying.'
       if (!isValidMobile(form.mobile)) found.mobile = 'Enter an 11-digit mobile number, like 0917 123 4567.'
     }
     if (forStep === 3 && method === 'gcash_manual' && !proof) found.proof = 'Upload your GCash screenshot so the owner can check it.'
@@ -150,6 +151,7 @@ export function Book() {
         guestName: form.name,
         guestMobile: form.mobile,
         guests: form.guests,
+        otherGuests: form.others.slice(0, form.guests - 1),
         method,
         proof: method === 'gcash_manual' ? proof : null
       })
@@ -259,17 +261,23 @@ export function Book() {
                 })}
               </div>
 
-              <div className="space-y-6">
-                <RoomGallery key={room.id} room={room} />
-                <div>
-                  <h3 className="text-lg font-bold">{room.name}</h3>
-                  <p className="mt-1 text-sm text-muted">{room.beds}, sleeps {room.sleeps}, {room.sizeSqm} sqm</p>
-                  <p className="mt-3 max-w-prose text-pretty text-base leading-[1.7] text-muted">{room.description}</p>
-                  <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-ink">
-                    {room.perks.map(perk => <li key={perk} className="inline-flex items-center gap-1.5"><Check size={13} className="text-primary" aria-hidden />{perk}</li>)}
-                  </ul>
+              <div className="space-y-14">
+                <div className="space-y-6">
+                  <RoomGallery key={room.id} room={room} />
+                  <div>
+                    <h3 className="font-display text-xl font-extrabold leading-tight">{room.name}</h3>
+                    <p className="mt-1.5 text-sm text-muted">{room.beds} · sleeps {room.sleeps} · {room.sizeSqm} sqm</p>
+                    <p className="mt-4 max-w-prose text-pretty text-base leading-[1.7] text-muted">{room.description}</p>
+                    <ul className="mt-5 grid gap-x-8 gap-y-2.5 text-sm text-ink sm:grid-cols-2">
+                      {room.perks.map(perk => <li key={perk} className="flex items-center gap-2.5"><Check size={14} className="shrink-0 text-primary" aria-hidden />{perk}</li>)}
+                    </ul>
+                    <button type="submit" disabled={submitting} className="btn btn-primary mt-8 px-6">
+                      {nextLabel}
+                      <ArrowRight size={16} aria-hidden />
+                    </button>
+                  </div>
                 </div>
-                <RoomReviews roomId={room.id} />
+                <RoomReviews key={room.id} roomId={room.id} />
               </div>
             </section>
           )}
@@ -294,9 +302,6 @@ export function Book() {
                 />
               </div>
               {errors.dates && <p role="alert" className="mt-2 text-sm font-semibold text-danger">{errors.dates}</p>}
-              {hasDates && (
-                <button type="button" onClick={() => { setCheckIn(null); setCheckOut(null) }} className="mt-3 text-sm font-semibold text-primary hover:underline">Clear dates</button>
-              )}
             </section>
           )}
 
@@ -322,6 +327,26 @@ export function Book() {
                   </select>
                   <p className="mt-1.5 text-sm text-muted">This room sleeps up to {room.sleeps}.</p>
                 </div>
+                {form.guests > 1 && (
+                  <fieldset className="sm:col-span-2" aria-describedby={errors.others ? 'e-others' : undefined}>
+                    <legend className="label">Other guests</legend>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {Array.from({ length: form.guests - 1 }, (_, i) => (
+                        <input
+                          key={i}
+                          className="field field-compact"
+                          aria-label={`Guest ${i + 2} full name`}
+                          placeholder={`Guest ${i + 2} full name`}
+                          autoComplete="off"
+                          value={form.others[i] ?? ''}
+                          aria-invalid={Boolean(errors.others)}
+                          onChange={e => update('others', Array.from({ length: form.guests - 1 }, (_, k) => (k === i ? e.target.value : form.others[k] ?? '')))}
+                        />
+                      ))}
+                    </div>
+                    <p id="e-others" className={`mt-1.5 text-sm ${errors.others ? 'text-danger' : 'text-muted'}`}>{errors.others ?? 'Names as they appear on a valid ID, one per guest.'}</p>
+                  </fieldset>
+                )}
                 <p className="text-sm text-muted sm:col-span-2">
                   Confirmation goes to <b className="text-ink">{account?.email}</b>.{' '}
                   <button type="button" onClick={() => signOut()} className="font-bold text-primary hover:underline">Not you? Sign out</button>
@@ -371,7 +396,7 @@ export function Book() {
             </section>
           )}
 
-          <div className="mt-8 flex items-center justify-between gap-3">
+          <div className={`mt-8 flex items-center justify-between gap-3 ${step === 0 ? 'hidden' : ''}`}>
             {step > 0 ? (
               <button type="button" onClick={() => goTo(step - 1)} className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-base font-bold text-ink transition-colors hover:text-primary"><ArrowLeft size={16} aria-hidden />Back</button>
             ) : <span />}
@@ -384,24 +409,53 @@ export function Book() {
         )}
 
         <aside aria-live="polite" className="lg:sticky lg:top-20">
-          <div className="glass-strong overflow-hidden rounded-panel shadow-lift">
-            <Photo name={room.photo} sizes="352px" className="aspect-[2/1] w-full object-cover" />
-            <div className="p-5">
-              <h2 className="text-lg font-bold">{room.name}</h2>
-              <p className="mt-0.5 text-sm text-muted">{room.beds}, sleeps {room.sleeps}</p>
+          <div className="overflow-hidden rounded-panel border border-line bg-surface p-2 shadow-lift">
+            <div className="relative overflow-hidden rounded-card">
+              <Photo name={room.photo} sizes="352px" className="aspect-[16/10] w-full object-cover" />
+            </div>
+            <div className="px-4 pb-4 pt-5">
+              <h2 className="font-display text-xl font-extrabold leading-tight">{room.name}</h2>
+              <p className="mt-1 text-sm text-muted">{room.beds} · sleeps {room.sleeps}</p>
               {quote && checkIn && checkOut ? (
                 <>
-                  <StayDates checkIn={checkIn} checkOut={checkOut} checkInTime={db.settings.checkInTime} checkOutTime={db.settings.checkOutTime} className="my-4" compact />
-                  <PriceLines lines={lines} />
-                  <p className="mt-4 text-center text-xs leading-relaxed text-muted">Free cancellation up to {db.settings.cancellationDays} days before check-in. After that the down payment is not refunded.</p>
+                  <dl className="mt-6 grid grid-cols-2 gap-4">
+                    <div>
+                      <dt className="text-xs font-semibold text-muted">Check-in</dt>
+                      <dd className="mt-1 text-base font-bold leading-tight">{formatDay(checkIn)}</dd>
+                      <dd className="mt-0.5 text-sm text-muted">from {db.settings.checkInTime}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-semibold text-muted">Check-out</dt>
+                      <dd className="mt-1 text-base font-bold leading-tight">{formatDay(checkOut)}</dd>
+                      <dd className="mt-0.5 text-sm text-muted">until {db.settings.checkOutTime}</dd>
+                    </div>
+                  </dl>
+                  <div className="mt-7">
+                    <PriceLines lines={lines.filter(line => !line.tone)} />
+                    <p className="mt-4 flex items-baseline justify-between gap-4 border-t border-line pt-4">
+                      <span className="text-sm font-semibold text-muted">Total for {plural(quote.nights, 'night')}</span>
+                      <span className="font-display text-2xl font-extrabold tabular-nums">{peso(quote.total)}</span>
+                    </p>
+                  </div>
+                  <div className="mt-5 rounded-card bg-primary-tint/70 px-4 py-3.5">
+                    <p className="flex items-baseline justify-between gap-4">
+                      <span className="text-sm font-bold text-primary-deep">Pay now ({db.settings.downPaymentPercent}%)</span>
+                      <span className="text-lg font-extrabold tabular-nums text-primary-deep">{peso(quote.downPayment)}</span>
+                    </p>
+                    <p className="mt-1.5 flex items-baseline justify-between gap-4 text-sm text-muted">
+                      <span>Pay on arrival</span>
+                      <span className="tabular-nums">{peso(quote.balance)}</span>
+                    </p>
+                  </div>
+                  <p className="mt-5 text-xs leading-relaxed text-muted">Free cancellation up to {db.settings.cancellationDays} days before check-in. After that the down payment is not refunded.</p>
                 </>
               ) : (
                 <>
-                  <p className="mt-4 text-sm text-muted">Pick your check-in and check-out dates to see the total.</p>
-                  <ul className="mt-3 space-y-1.5 text-sm text-muted">
-                    <li className="flex justify-between"><span>Weeknights</span><span>{peso(room.baseRate)}</span></li>
-                    <li className="flex justify-between"><span>Friday and Saturday nights</span><span>{peso(room.baseRate + room.weekendExtra)}</span></li>
-                    <li className="flex justify-between"><span>Cleaning fee, once per stay</span><span>{peso(db.settings.cleaningFee)}</span></li>
+                  <p className="mt-4 text-sm text-muted">Pick your dates to see the total.</p>
+                  <ul className="mt-3 divide-y divide-line text-sm">
+                    <li className="flex justify-between py-2.5"><span className="text-muted">Weeknights</span><span className="font-bold tabular-nums">{peso(room.baseRate)}</span></li>
+                    <li className="flex justify-between py-2.5"><span className="text-muted">Friday and Saturday nights</span><span className="font-bold tabular-nums">{peso(room.baseRate + room.weekendExtra)}</span></li>
+                    <li className="flex justify-between py-2.5"><span className="text-muted">Cleaning fee, once per stay</span><span className="font-bold tabular-nums">{peso(db.settings.cleaningFee)}</span></li>
                   </ul>
                 </>
               )}

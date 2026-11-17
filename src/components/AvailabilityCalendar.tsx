@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import type { Room } from '../types'
 import { addDays, addMonths, formatDay, formatMonth, monthCells, monthStart, nightsBetween, parseKey, today, weekdayLabels, isWeekendNight, type DateKey } from '../lib/dates'
 import { isNightTaken, isRangeFree } from '../lib/availability'
@@ -17,7 +17,7 @@ interface Props {
 }
 
 const dateInput =
-  'mt-1.5 block w-full border border-line bg-surface px-3 py-2.5 text-base font-bold text-ink transition-[border-color,box-shadow] hover:border-ink/30 focus:border-primary focus:outline-none focus:shadow-[0_0_0_4px_var(--color-primary-tint)]'
+  'mt-1.5 block w-full rounded-control border border-line bg-surface px-3.5 py-2.5 text-base font-bold text-ink transition-[border-color,box-shadow] hover:border-ink/30 focus:border-primary focus:outline-none focus:shadow-[0_0_0_4px_var(--color-primary-tint)]'
 
 export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onRejected }: Props) {
   const db = useDb()
@@ -41,6 +41,8 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
 
   const pick = (night: DateKey) => {
     if (night < now) return
+    if (night === checkIn) return onChange(null, null)
+    if (night === checkOut) return onChange(checkIn, null)
     if (!awaitingCheckOut) {
       if (taken(night)) return onRejected('That night is already booked. Pick another date.')
       return onChange(night, null)
@@ -88,11 +90,19 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
           <input id="date-out" type="date" className={dateInput} min={checkIn ? addDays(checkIn, 1) : addDays(now, 1)} value={checkOut ?? ''} onChange={event => typeCheckOut(event.target.value)} />
         </div>
       </div>
-      <p className="mt-2 min-h-5 text-sm text-muted" aria-live="polite">
-        {nights > 0 ? <><b className="text-ink">{plural(nights, 'night')}</b>, {formatDay(checkIn!)} to {formatDay(checkOut!)}</> : 'Type your dates, or pick them on the calendar below.'}
-      </p>
+      <div className="mt-4 flex min-h-9 flex-wrap items-center gap-x-3 gap-y-2" aria-live="polite">
+        {nights > 0 ? (
+          <>
+            <span className="chip bg-primary-tint text-primary-deep">{plural(nights, 'night')}</span>
+            <span className="flex items-center gap-2 text-sm font-semibold text-ink">{formatDay(checkIn!)}<ArrowRight size={14} className="text-muted" aria-hidden />{formatDay(checkOut!)}</span>
+          </>
+        ) : (
+          <span className="text-sm text-muted">Type your dates, or pick them on the calendar below.</span>
+        )}
+        {checkIn && <button type="button" onClick={() => onChange(null, null)} className="ml-auto inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-bold text-ink transition-colors hover:border-primary hover:bg-primary hover:text-white"><X size={13} aria-hidden />Clear dates</button>}
+      </div>
 
-      <div className="mt-5 border-t border-line pt-5">
+      <div className="mt-6 border-t border-line pt-6">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-display text-base font-bold">{formatMonth(month)}</h3>
           <div className="flex gap-1.5">
@@ -116,9 +126,9 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
           </div>
         </div>
 
-        <div role="grid" aria-label={formatMonth(month)} className="grid grid-cols-7">
+        <div role="grid" aria-label={formatMonth(month)} className="grid grid-cols-7 gap-y-1">
           {weekdayLabels.map(label => (
-            <div key={label} className="pb-2 text-center text-xs font-bold uppercase tracking-wide text-muted">{label}</div>
+            <div key={label} className="pb-2 text-center text-xs font-semibold text-muted">{label}</div>
           ))}
           {monthCells(month).map((night, index) => {
             if (!night) return <div key={`blank-${index}`} />
@@ -130,15 +140,16 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
             const selectable = canPick(night)
             const price = nightRate(room, night)
             const marked = isStart || isEnd
-            const tone = marked
-              ? 'rounded-control bg-secondary text-white'
-              : inRange
-                ? 'bg-primary-tint text-ink'
-                : isTaken
-                  ? 'text-muted/60'
-                  : past
-                    ? 'text-muted/40'
-                    : 'rounded-control text-ink hover:bg-sand'
+            const hasRange = checkIn !== null && rangeEnd !== null && rangeEnd > checkIn
+            const band = inRange
+              ? 'inset-x-0'
+              : hasRange && isStart
+                ? 'left-1/2 right-0'
+                : hasRange && night === rangeEnd
+                  ? 'left-0 right-1/2'
+                  : ''
+            const blocked = isTaken && !selectable && !marked
+            const tone = blocked ? 'text-muted/50' : past ? 'text-muted/40' : 'text-ink'
             return (
               <button
                 key={night}
@@ -150,15 +161,15 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
                 onMouseEnter={() => setHover(night)}
                 onMouseLeave={() => setHover(null)}
                 onFocus={() => setHover(night)}
-                className={`relative flex h-12 flex-col items-center justify-center gap-0.5 text-sm font-bold transition-colors disabled:cursor-not-allowed sm:h-14 ${tone} ${isTaken && !marked ? 'bg-[repeating-linear-gradient(-45deg,transparent_0_5px,var(--color-sand)_5px_10px)]' : ''}`}
+                className={`group relative isolate flex h-14 flex-col items-center justify-start gap-0.5 pt-1 text-sm font-semibold transition-colors focus-visible:outline-none disabled:cursor-not-allowed sm:h-16 ${tone}`}
               >
-                <span className={isTaken && !marked ? 'line-through' : ''}>{parseKey(night).getUTCDate()}</span>
+                {band && <span aria-hidden className={`absolute top-1 -z-10 h-9 bg-primary-tint ${band}`} />}
+                <span className={`grid size-9 place-items-center rounded-full transition-colors group-focus-visible:outline group-focus-visible:outline-[3px] group-focus-visible:outline-offset-2 group-focus-visible:outline-primary ${marked ? 'bg-secondary text-white' : selectable ? 'group-hover:bg-sand' : ''} ${night === now && !marked ? 'ring-1 ring-inset ring-primary' : ''} ${blocked ? 'line-through' : ''}`}>{parseKey(night).getUTCDate()}</span>
                 {!past && (
-                  <span className={`text-xs font-medium leading-none ${marked ? 'text-white/80' : isWeekendNight(night) && !isTaken ? 'font-bold text-ink' : 'text-muted'}`}>
-                    {isTaken && !marked ? '' : compactPeso(price)}
+                  <span className={`text-[0.6875rem] font-medium leading-none ${isWeekendNight(night) && !blocked ? 'font-bold text-ink' : 'text-muted'}`}>
+                    {blocked ? '' : compactPeso(price)}
                   </span>
                 )}
-                {night === now && !marked && <span className="absolute bottom-1 size-1 bg-primary" aria-hidden />}
               </button>
             )
           })}
@@ -166,8 +177,8 @@ export function AvailabilityCalendar({ room, checkIn, checkOut, onChange, onReje
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted">
-        <span className="flex items-center gap-2"><i className="size-3.5 bg-secondary" />Your stay</span>
-        <span className="flex items-center gap-2"><i className="size-3.5 bg-[repeating-linear-gradient(-45deg,var(--color-sand)_0_3px,#d9d3c6_3px_6px)]" />Booked</span>
+        <span className="flex items-center gap-2"><i className="size-3.5 rounded-full bg-secondary" />Your dates</span>
+        <span className="flex items-center gap-2"><s className="text-muted/70">12</s>Booked</span>
         <span>Price per night, bold on Friday and Saturday</span>
       </div>
     </div>

@@ -8,14 +8,14 @@ export interface PriceLine {
 
 const TONES = {
   default: 'text-sm',
-  total: 'mt-2 border-t border-line pt-3 text-base font-bold',
-  due: 'text-sm font-bold text-primary',
+  total: 'mt-3 border-t border-line pt-4 text-lg font-extrabold',
+  due: 'text-sm font-bold text-primary-deep',
   muted: 'text-sm text-muted'
 }
 
 export function PriceLines({ lines }: { lines: PriceLine[] }) {
   return (
-    <ul className="space-y-1.5">
+    <ul className="space-y-2">
       {lines.map(line => (
         <li key={line.label} className={`flex justify-between gap-4 ${TONES[line.tone ?? 'default']}`}>
           <span>{line.label}</span>
